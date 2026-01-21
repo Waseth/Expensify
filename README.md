@@ -94,4 +94,4 @@ This app turned confusion into clarity — and leftover money into intentional m
 - CSS  
 - Vanilla JavaScript  
 - Chart.js (for visualizations)
-```
+
