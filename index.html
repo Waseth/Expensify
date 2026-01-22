@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expensify</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="logo.png" alt="logo" class="logo-image">
+            <h1>xpensify</h1>
+        </div>
+        
+        <div class="nav-links">
+            <button class="nav-btn active" data-dashboard="input">
+                Input Dashboard
+            </button>
+            <button class="nav-btn" data-dashboard="needs">
+                Needs Dashboard
+            </button>
+            <button class="nav-btn" data-dashboard="income">
+                My Money
+            </button>
+        </div>
+
+        <div class="month-display">
+            <span id="current-month">January 2024</span>
+            <button id="reset-month" class="btn-warning">
+                <i class="fas fa-redo"></i>
+                Reset Month
+            </button>
+        </div>
+    </nav>
+
+
+    <main class="container">
+
+        <section id="input-dashboard" class="dashboard active">
+            <div class="dashboard-header">
+                <h2>Input Dashboard</h2>
+                <p>Set your monthly budget and track expenses</p>
+            </div>
+
+            <div class="grid-container">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Monthly Setup</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="monthly-allowance">
+                                <i class="fas fa-coins"></i> Monthly Allowance
+                            </label>
+                            <div class="input-with-icon">
+                                <span class="currency">Ksh</span>
+                                <input type="number" id="monthly-allowance">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fixed-week1-budget">
+                                <i class="fas fa-coins"></i>Fixed + Week 1 Budget
+                            </label>
+                            <div class="input-with-icon">
+                                <span class="currency">Rs</span>
+                                <input type="number" id="fixed-week1-budget" min="0" step="100" placeholder="8,000">
+                            </div>
+                            <small class="helper-text">Enter your needs budget for the first week</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="weeks2-4-budget">
+                                <i class="fas fa-coins"></i> Weeks 2-4 Budget (each)
+                            </label>
+                            <div class="readonly-input" id="weeks2-4-budget">Rs 0</div>
+                            <small class="helper-text">Auto-calculated from remaining allowance</small>
+                        </div>
+
+                        <button id="update-budget" class="btn-primary">
+                            <i class="fas fa-save"></i> Update Budget Plan
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-receipt"></i> Add Expense</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="expense-form">
+                            <div class="form-group">
+                                <label for="expense-category">
+                                    <i class="fas fa-tags"></i> Category
+                                </label>
+                                <select id="expense-category" required>
+                                    <option value="">Select Category</option>
+                                    <optgroup label="Needs">
+                                        <option value="fixed_week1">Fixed + Week 1 Needs</option>
+                                        <option value="week2">Week 2 Needs</option>
+                                        <option value="week3">Week 3 Needs</option>
+                                        <option value="week4">Week 4 Needs</option>
+                                    </optgroup>
+                                    <optgroup label="Income">
+                                        <option value="personal">Personal Spending</option>
+                                        <option value="savings">Savings</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expense-description">
+                                    <i class="fas fa-file-alt"></i> Description
+                                </label>
+                                <input type="text" id="expense-description" placeholder="Lunch, Groceries, Transport..."
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expense-amount">
+                                    <i class="fas fa-money-bill"></i> Amount
+                                </label>
+                                <div class="input-with-icon">
+                                    <span class="currency">Rs</span>
+                                    <input type="number" id="expense-amount" min="0" step="10" placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="expense-date">
+                                    <i class="fas fa-calendar-day"></i> Date
+                                </label>
+                                <input type="date" id="expense-date" required>
+                            </div>
+
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-plus-circle"></i> Add Expense
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recent Expenses Card -->
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Recent Expenses</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="recent-expenses">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Expenses will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie"></i> Budget Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-item">
+                            <span class="summary-label">Monthly Allowance</span>
+                            <span class="summary-value" id="summary-allowance">Rs 0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Needs Total</span>
+                            <span class="summary-value" id="summary-needs">Rs 0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Spent</span>
+                            <span class="summary-value" id="summary-spent">Rs 0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Available Income</span>
+                            <span class="summary-value text-success" id="summary-income">Rs 0</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="summary-item highlight">
+                            <span class="summary-label">Savings Balance</span>
+                            <span class="summary-value text-primary" id="summary-savings">Rs 0</span>
+                        </div>
+                        <div class="summary-item highlight">
+                            <span class="summary-label">Personal Balance</span>
+                            <span class="summary-value text-info" id="summary-personal">Rs 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEEDS DASHBOARD -->
+        <section id="needs-dashboard" class="dashboard">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-home"></i> Needs Dashboard</h2>
+                <p>Track your weekly needs spending</p>
+            </div>
+
+            <div class="grid-container">
+                <!-- Needs Summary -->
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-bar"></i> Weekly Needs Overview</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="needs-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Week 1 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-week"></i> Fixed + Week 1</h3>
+                        <span class="badge" id="week1-status">On Budget</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="budget-display">
+                            <div class="budget-item">
+                                <span class="budget-label">Allocated</span>
+                                <span class="budget-value" id="week1-allocated">Rs 0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span class="budget-label">Spent</span>
+                                <span class="budget-value" id="week1-spent">Rs 0</span>
+                            </div>
+                            <div class="budget-item highlight">
+                                <span class="budget-label">Remaining</span>
+                                <span class="budget-value" id="week1-remaining">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Budget Usage</span>
+                                <span id="week1-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="week1-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="alert-message" id="week1-alert">
+                            <i class="fas fa-check-circle"></i>
+                            <span>You are on budget</span>
+                        </div>
+                        <div class="expenses-list" id="week1-expenses">
+                            <!-- Expenses will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Week 2 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-week"></i> Week 2</h3>
+                        <span class="badge" id="week2-status">On Budget</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Same structure as Week 1 -->
+                        <div class="budget-display">
+                            <div class="budget-item">
+                                <span class="budget-label">Allocated</span>
+                                <span class="budget-value" id="week2-allocated">Rs 0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span class="budget-label">Spent</span>
+                                <span class="budget-value" id="week2-spent">Rs 0</span>
+                            </div>
+                            <div class="budget-item highlight">
+                                <span class="budget-label">Remaining</span>
+                                <span class="budget-value" id="week2-remaining">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Budget Usage</span>
+                                <span id="week2-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="week2-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="alert-message" id="week2-alert">
+                            <i class="fas fa-check-circle"></i>
+                            <span>You are on budget</span>
+                        </div>
+                        <div class="expenses-list" id="week2-expenses"></div>
+                    </div>
+                </div>
+
+                <!-- Week 3 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-week"></i> Week 3</h3>
+                        <span class="badge" id="week3-status">On Budget</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Same structure as Week 1 -->
+                        <div class="budget-display">
+                            <div class="budget-item">
+                                <span class="budget-label">Allocated</span>
+                                <span class="budget-value" id="week3-allocated">Rs 0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span class="budget-label">Spent</span>
+                                <span class="budget-value" id="week3-spent">Rs 0</span>
+                            </div>
+                            <div class="budget-item highlight">
+                                <span class="budget-label">Remaining</span>
+                                <span class="budget-value" id="week3-remaining">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Budget Usage</span>
+                                <span id="week3-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="week3-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="alert-message" id="week3-alert">
+                            <i class="fas fa-check-circle"></i>
+                            <span>You are on budget</span>
+                        </div>
+                        <div class="expenses-list" id="week3-expenses"></div>
+                    </div>
+                </div>
+
+                <!-- Week 4 Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-week"></i> Week 4</h3>
+                        <span class="badge" id="week4-status">On Budget</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Same structure as Week 1 -->
+                        <div class="budget-display">
+                            <div class="budget-item">
+                                <span class="budget-label">Allocated</span>
+                                <span class="budget-value" id="week4-allocated">Rs 0</span>
+                            </div>
+                            <div class="budget-item">
+                                <span class="budget-label">Spent</span>
+                                <span class="budget-value" id="week4-spent">Rs 0</span>
+                            </div>
+                            <div class="budget-item highlight">
+                                <span class="budget-label">Remaining</span>
+                                <span class="budget-value" id="week4-remaining">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Budget Usage</span>
+                                <span id="week4-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="week4-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="alert-message" id="week4-alert">
+                            <i class="fas fa-check-circle"></i>
+                            <span>You are on budget</span>
+                        </div>
+                        <div class="expenses-list" id="week4-expenses"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INCOME DASHBOARD (WASETH'S MONEY) -->
+        <section id="income-dashboard" class="dashboard">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Waseth's Money Dashboard</h2>
+                <p>Track your income, savings, and personal spending</p>
+            </div>
+
+            <div class="grid-container">
+                <!-- Income Overview Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie"></i> Money Flow</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="money-pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Summary Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-hand-holding-usd"></i> Income Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="income-flow">
+                            <div class="flow-step">
+                                <div class="flow-icon">
+                                    <i class="fas fa-money-bill-alt"></i>
+                                </div>
+                                <div class="flow-content">
+                                    <span class="flow-label">Monthly Allowance</span>
+                                    <span class="flow-value" id="flow-allowance">Rs 0</span>
+                                </div>
+                            </div>
+
+                            <div class="flow-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+
+                            <div class="flow-step">
+                                <div class="flow-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="flow-content">
+                                    <span class="flow-label">Needs Budget</span>
+                                    <span class="flow-value" id="flow-needs">Rs 0</span>
+                                </div>
+                            </div>
+
+                            <div class="flow-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+
+                            <div class="flow-step">
+                                <div class="flow-icon">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="flow-content">
+                                    <span class="flow-label">Income (Surplus/Deficit)</span>
+                                    <span class="flow-value text-success" id="flow-income">Rs 0</span>
+                                </div>
+                            </div>
+
+                            <div class="flow-split">
+                                <div class="split-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>50%</span>
+                                </div>
+                                <div class="split-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>50%</span>
+                                </div>
+                            </div>
+
+                            <div class="flow-split-content">
+                                <div class="flow-step">
+                                    <div class="flow-icon">
+                                        <i class="fas fa-piggy-bank"></i>
+                                    </div>
+                                    <div class="flow-content">
+                                        <span class="flow-label">Savings</span>
+                                        <span class="flow-value text-primary" id="flow-savings">Rs 0</span>
+                                    </div>
+                                </div>
+
+                                <div class="flow-step">
+                                    <div class="flow-icon">
+                                        <i class="fas fa-gamepad"></i>
+                                    </div>
+                                    <div class="flow-content">
+                                        <span class="flow-label">Personal</span>
+                                        <span class="flow-value text-info" id="flow-personal">Rs 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-piggy-bank"></i> Savings</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="savings-display">
+                            <div class="savings-item">
+                                <span class="savings-label">Current Balance</span>
+                                <span class="savings-value" id="savings-balance">Rs 0</span>
+                            </div>
+                            <div class="savings-item">
+                                <span class="savings-label">This Month's Growth</span>
+                                <span class="savings-value text-success" id="savings-growth">+Rs 0</span>
+                            </div>
+                            <div class="savings-item">
+                                <span class="savings-label">Total Saved</span>
+                                <span class="savings-value text-primary" id="savings-total">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="alert-message success" id="savings-alert">
+                            <i class="fas fa-trophy"></i>
+                            <span>Great job! Your savings are growing.</span>
+                        </div>
+                        <div class="savings-history" id="savings-expenses">
+                            <!-- Savings expenses will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Spending Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-gamepad"></i> Personal Spending</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="personal-display">
+                            <div class="personal-item">
+                                <span class="personal-label">Available Balance</span>
+                                <span class="personal-value" id="personal-balance">Rs 0</span>
+                            </div>
+                            <div class="personal-item">
+                                <span class="personal-label">Total Spent</span>
+                                <span class="personal-value" id="personal-spent">Rs 0</span>
+                            </div>
+                            <div class="personal-item">
+                                <span class="personal-label">Remaining Budget</span>
+                                <span class="personal-value" id="personal-remaining">Rs 0</span>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Budget Usage</span>
+                                <span id="personal-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="personal-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="alert-message warning" id="personal-alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>You're staying within budget</span>
+                        </div>
+                        <div class="personal-history" id="personal-expenses">
+                            <!-- Personal expenses will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list-alt"></i> Recent Transactions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="income-transactions">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Transactions will be added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification System -->
+    <div id="notification-container"></div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Alert</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="modal-confirm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
