@@ -261,10 +261,6 @@ input[type=number]::-webkit-outer-spin-button {
     padding: var(--spacing-lg);
 }
 
-/* ===========================
-   BUTTONS
-   =========================== */
-
 .btn-primary, .btn-secondary, .btn-warning {
     padding: var(--spacing-sm) var(--spacing-lg);
     border: none;
@@ -318,10 +314,6 @@ input[type=number]::-webkit-outer-spin-button {
     box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
 }
 
-/* ===========================
-   FORMS & INPUTS
-   =========================== */
-
 .form-group {
     margin-bottom: var(--spacing-md);
 }
@@ -345,6 +337,9 @@ input, select, textarea {
     color: var(--text-primary);
     font-size: 1rem;
     transition: all var(--transition-fast);
+}
+option{
+  color: #0f0c29;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -387,10 +382,6 @@ input:focus, select:focus, textarea:focus {
     font-weight: 600;
 }
 
-/* ===========================
-   TABLES
-   =========================== */
-
 .table-container {
     overflow-x: auto;
     border-radius: var(--radius-md);
@@ -431,11 +422,9 @@ tbody tr {
 tbody tr:hover {
     background: rgba(94, 58, 238, 0.05);
 }
-
-/* ===========================
-   BUDGET DISPLAY COMPONENTS
-   =========================== */
-
+#budget-card{
+  margin-bottom: 80px;
+}
 .budget-display, .summary-item, .savings-item, .personal-item {
     display: flex;
     justify-content: space-between;

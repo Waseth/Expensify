@@ -1,14 +1,8 @@
-// ===========================
-// STATE MANAGEMENT
-// ===========================
-
 const AppState = {
-    // Budget Configuration
     monthlyAllowance: 0,
     fixedWeek1Budget: 0,
     weeks2to4Budget: 0,
 
-    // Needs Categories
     needs: {
         fixed_week1: {
             allocated: 0,
@@ -36,7 +30,6 @@ const AppState = {
         }
     },
 
-    // Income Categories
     income: {
         total: 0,
         savings: {
@@ -51,23 +44,13 @@ const AppState = {
         }
     },
 
-    // All Expenses (for history)
     allExpenses: [],
-
-    // Month Tracking
     currentMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
     lastResetDate: new Date().toISOString().split('T')[0]
 };
 
-// ===========================
-// DOM ELEMENTS
-// ===========================
-
-// Navigation
 const navButtons = document.querySelectorAll('.nav-btn');
 const dashboards = document.querySelectorAll('.dashboard');
-
-// Input Dashboard Elements
 const monthlyAllowanceInput = document.getElementById('monthly-allowance');
 const fixedWeek1BudgetInput = document.getElementById('fixed-week1-budget');
 const weeks2to4BudgetDisplay = document.getElementById('weeks2-4-budget');
@@ -77,8 +60,6 @@ const expenseCategorySelect = document.getElementById('expense-category');
 const expenseDescriptionInput = document.getElementById('expense-description');
 const expenseAmountInput = document.getElementById('expense-amount');
 const expenseDateInput = document.getElementById('expense-date');
-
-// Summary Display Elements
 const summaryAllowance = document.getElementById('summary-allowance');
 const summaryNeeds = document.getElementById('summary-needs');
 const summarySpent = document.getElementById('summary-spent');
@@ -86,48 +67,23 @@ const summaryIncome = document.getElementById('summary-income');
 const summarySavings = document.getElementById('summary-savings');
 const summaryPersonal = document.getElementById('summary-personal');
 
-// Charts
 let needsBarChart = null;
 let moneyPieChart = null;
 
-// ===========================
-// INITIALIZATION
-// ===========================
-
 function initApp() {
-    // Set default date to today
     expenseDateInput.valueAsDate = new Date();
-
-    // Set step for amount inputs to allow decimals
     monthlyAllowanceInput.step = '0.01';
     fixedWeek1BudgetInput.step = '0.01';
     expenseAmountInput.step = '0.01';
-
-    // Update month display
     updateMonthDisplay();
-
-    // Load saved state from localStorage
     loadFromLocalStorage();
-
-    // Initialize event listeners
     setupEventListeners();
-
-    // Initialize charts
     initCharts();
-
-    // Update all UI
     updateAllDisplays();
-
-    // Show welcome notification
-    showNotification('Welcome to Expensify!.', 'success');
+    showWelcomeNotification();
 }
 
-// ===========================
-// EVENT LISTENERS
-// ===========================
-
 function setupEventListeners() {
-    // Navigation
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
             const dashboardId = button.dataset.dashboard;
@@ -135,24 +91,13 @@ function setupEventListeners() {
         });
     });
 
-    // Budget Update
     updateBudgetButton.addEventListener('click', updateBudget);
-
-    // Expense Form Submission
     expenseForm.addEventListener('submit', addExpense);
-
-    // Auto-calculate weeks 2-4 budget
     monthlyAllowanceInput.addEventListener('input', calculateWeeksBudget);
     fixedWeek1BudgetInput.addEventListener('input', calculateWeeksBudget);
-
-    // Reset Month Button
     document.getElementById('reset-month').addEventListener('click', resetMonth);
-
-    // Modal Close Button
     document.querySelector('.modal-close').addEventListener('click', closeModal);
     document.getElementById('modal-confirm').addEventListener('click', closeModal);
-
-    // Theme Toggler
     setupThemeToggler();
 }
 
@@ -169,10 +114,6 @@ function setupThemeToggler() {
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 }
 
-// ===========================
-// THEME MANAGEMENT
-// ===========================
-
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? null : 'light';
@@ -182,31 +123,20 @@ function toggleTheme() {
         document.documentElement.setAttribute('data-theme', newTheme);
         icon.className = 'fas fa-sun';
         localStorage.setItem('budget-theme', 'light');
-        showNotification('Switched to light theme', 'success');
     } else {
         document.documentElement.removeAttribute('data-theme');
         icon.className = 'fas fa-moon';
         localStorage.setItem('budget-theme', 'dark');
-        showNotification('Switched to dark theme', 'success');
     }
 }
 
-// ===========================
-// DASHBOARD NAVIGATION
-// ===========================
-
 function switchDashboard(dashboardId) {
-    // Update active nav button
     navButtons.forEach(button => {
         button.classList.toggle('active', button.dataset.dashboard === dashboardId);
     });
-
-    // Show selected dashboard
     dashboards.forEach(dashboard => {
         dashboard.classList.toggle('active', dashboard.id === `${dashboardId}-dashboard`);
     });
-
-    // Update specific dashboard if needed
     if (dashboardId === 'needs') {
         updateNeedsDashboard();
     } else if (dashboardId === 'income') {
@@ -214,20 +144,16 @@ function switchDashboard(dashboardId) {
     }
 }
 
-// ===========================
-// BUDGET CALCULATIONS
-// ===========================
-
 function calculateWeeksBudget() {
     const allowance = parseFloat(monthlyAllowanceInput.value) || 0;
     const week1Budget = parseFloat(fixedWeek1BudgetInput.value) || 0;
 
     if (allowance >= week1Budget && week1Budget > 0) {
         const remaining = allowance - week1Budget;
-        const weeklyBudget = remaining / 3; // No rounding, keep exact decimal
-        weeks2to4BudgetDisplay.textContent = `Rs ${formatCurrency(weeklyBudget)}`;
+        const weeklyBudget = remaining / 3;
+        weeks2to4BudgetDisplay.textContent = `Ksh ${formatCurrency(weeklyBudget)}`;
     } else {
-        weeks2to4BudgetDisplay.textContent = 'Rs 0';
+        weeks2to4BudgetDisplay.textContent = 'Ksh 0';
     }
 }
 
@@ -250,15 +176,12 @@ function updateBudget() {
         return;
     }
 
-    // Update state
     AppState.monthlyAllowance = allowance;
     AppState.fixedWeek1Budget = week1Budget;
 
-    // Calculate weeks 2-4 budget (exact decimal)
     const remaining = allowance - week1Budget;
     AppState.weeks2to4Budget = remaining / 3;
 
-    // Initialize needs allocations
     AppState.needs.fixed_week1.allocated = week1Budget;
     AppState.needs.fixed_week1.remaining = week1Budget;
 
@@ -267,20 +190,14 @@ function updateBudget() {
         AppState.needs[weekKey].allocated = AppState.weeks2to4Budget;
         AppState.needs[weekKey].remaining = AppState.weeks2to4Budget;
     }
-
-    // Calculate initial income
     calculateIncome();
-
-    // Update UI
     updateAllDisplays();
     saveToLocalStorage();
-
-    showNotification('Budget updated successfully!', 'success');
+    // Only show success notification if there was a significant change
+    if (allowance > 0 || week1Budget > 0) {
+        showNotification('Budget updated!', 'success');
+    }
 }
-
-// ===========================
-// EXPENSE MANAGEMENT
-// ===========================
 
 function addExpense(e) {
     e.preventDefault();
@@ -290,7 +207,6 @@ function addExpense(e) {
     const description = expenseDescriptionInput.value.trim();
     const date = expenseDateInput.value;
 
-    // Validation
     if (isNaN(amount) || amount <= 0) {
         showAlert('Invalid Amount', 'Please enter a valid expense amount.');
         return;
@@ -311,22 +227,19 @@ function addExpense(e) {
         return;
     }
 
-    // Create expense object
     const expense = {
         id: Date.now(),
-        amount: parseFloat(amount.toFixed(2)), // Store with 2 decimal places
+        amount: parseFloat(amount.toFixed(2)),
         category: category,
         description: description,
         date: date,
         timestamp: new Date().toISOString()
     };
 
-    // Add to appropriate category
     if (category.startsWith('week') || category === 'fixed_week1') {
-        // Needs expense
         if (AppState.needs[category].remaining < amount) {
             const overspendAmount = (amount - AppState.needs[category].remaining).toFixed(2);
-            if (!confirm(`This will overspend your ${getCategoryName(category)} budget by Rs ${formatCurrency(overspendAmount)}. Continue?`)) {
+            if (!confirm(`This will overspend your ${getCategoryName(category)} budget by Ksh ${formatCurrency(overspendAmount)}. Continue?`)) {
                 return;
             }
         }
@@ -335,15 +248,14 @@ function addExpense(e) {
         AppState.needs[category].remaining = parseFloat((AppState.needs[category].remaining - amount).toFixed(2));
         AppState.needs[category].expenses.push(expense);
 
-        // Check if this is an overspend
-        if (AppState.needs[category].remaining < 0) {
-            showNotification(`Warning: You've overspent your ${getCategoryName(category)} budget by Rs ${formatCurrency(Math.abs(AppState.needs[category].remaining))}!`, 'warning');
+        // Only show overspend notification for significant amounts (>100)
+        if (AppState.needs[category].remaining < -100) {
+            showNotification(`Overspent ${getCategoryName(category)} budget by Ksh ${formatCurrency(Math.abs(AppState.needs[category].remaining))}`, 'warning');
         }
 
     } else {
-        // Income expense (Personal or Savings)
         if (AppState.income[category].balance < amount) {
-            showAlert('Insufficient Funds', `You don't have enough balance in ${getCategoryName(category)}. Current balance: Rs ${formatCurrency(AppState.income[category].balance)}`);
+            showAlert('Insufficient Funds', `You don't have enough balance in ${getCategoryName(category)}. Current balance: Ksh ${formatCurrency(AppState.income[category].balance)}`);
             return;
         }
 
@@ -352,27 +264,18 @@ function addExpense(e) {
         AppState.income[category].expenses.push(expense);
     }
 
-    // Add to all expenses
     AppState.allExpenses.unshift(expense);
 
-    // Recalculate income after needs change
     if (category.startsWith('week') || category === 'fixed_week1') {
         calculateIncome();
     }
-
-    // Update UI
     updateAllDisplays();
     saveToLocalStorage();
-
-    // Reset form
     expenseForm.reset();
     expenseDateInput.valueAsDate = new Date();
-
-    showNotification(`Expense added: ${description} - Rs ${formatCurrency(amount)}`, 'success');
 }
 
 function calculateIncome() {
-    // Calculate total needs spent
     let totalNeedsSpent = 0;
     let totalNeedsAllocated = 0;
 
@@ -381,21 +284,14 @@ function calculateIncome() {
         totalNeedsAllocated += AppState.needs[key].allocated;
     });
 
-    // Calculate surplus/deficit
     const needsDifference = parseFloat((totalNeedsAllocated - totalNeedsSpent).toFixed(2));
-
-    // Update income (positive difference = surplus, negative = deficit)
     AppState.income.total = needsDifference;
-
-    // Split income 50/50 between savings and personal (exact decimal split)
     const halfIncome = parseFloat((AppState.income.total / 2).toFixed(2));
 
-    // Only add to balances if positive (surplus)
     if (halfIncome > 0) {
         AppState.income.savings.balance = parseFloat((AppState.income.savings.balance + halfIncome).toFixed(2));
         AppState.income.personal.balance = parseFloat((AppState.income.personal.balance + halfIncome).toFixed(2));
     } else if (halfIncome < 0) {
-        // For deficit, subtract from balances proportionally
         const deficit = Math.abs(halfIncome);
         const totalAvailable = AppState.income.savings.balance + AppState.income.personal.balance;
 
@@ -409,10 +305,6 @@ function calculateIncome() {
     }
 }
 
-// ===========================
-// UI UPDATES
-// ===========================
-
 function updateAllDisplays() {
     updateInputDashboard();
     updateNeedsDashboard();
@@ -421,42 +313,35 @@ function updateAllDisplays() {
 }
 
 function updateInputDashboard() {
-    // Update summary with formatted currency
-    summaryAllowance.textContent = `Rs ${formatCurrency(AppState.monthlyAllowance)}`;
+    summaryAllowance.textContent = `Ksh ${formatCurrency(AppState.monthlyAllowance)}`;
 
     const totalNeedsAllocated = Object.values(AppState.needs).reduce((sum, week) => sum + week.allocated, 0);
     const totalNeedsSpent = Object.values(AppState.needs).reduce((sum, week) => sum + week.spent, 0);
 
-    summaryNeeds.textContent = `Rs ${formatCurrency(totalNeedsAllocated)}`;
-    summarySpent.textContent = `Rs ${formatCurrency(totalNeedsSpent)}`;
-    summaryIncome.textContent = `Rs ${formatCurrency(AppState.income.total)}`;
-    summarySavings.textContent = `Rs ${formatCurrency(AppState.income.savings.balance)}`;
-    summaryPersonal.textContent = `Rs ${formatCurrency(AppState.income.personal.balance)}`;
-
-    // Update recent expenses table
+    summaryNeeds.textContent = `Ksh ${formatCurrency(totalNeedsAllocated)}`;
+    summarySpent.textContent = `Ksh ${formatCurrency(totalNeedsSpent)}`;
+    summaryIncome.textContent = `Ksh ${formatCurrency(AppState.income.total)}`;
+    summarySavings.textContent = `Ksh ${formatCurrency(AppState.income.savings.balance)}`;
+    summaryPersonal.textContent = `Ksh ${formatCurrency(AppState.income.personal.balance)}`;
     updateRecentExpenses();
 }
 
 function updateRecentExpenses() {
     const tbody = document.querySelector('#recent-expenses tbody');
     tbody.innerHTML = '';
-
-    // Show last 10 expenses
     const recentExpenses = AppState.allExpenses.slice(0, 10);
-
     recentExpenses.forEach(expense => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${formatDate(expense.date)}</td>
             <td><span class="badge" data-status="${getExpenseStatus(expense)}">${getCategoryName(expense.category)}</span></td>
             <td>${expense.description}</td>
-            <td class="${expense.amount > 0 ? 'text-danger' : ''}">Rs ${formatCurrency(expense.amount)}</td>
+            <td class="${expense.amount > 0 ? 'text-danger' : ''}">Ksh ${formatCurrency(expense.amount)}</td>
             <td><button class="btn-secondary delete-expense" data-id="${expense.id}">Delete</button></td>
         `;
         tbody.appendChild(row);
     });
 
-    // Add delete event listeners
     document.querySelectorAll('.delete-expense').forEach(button => {
         button.addEventListener('click', function() {
             const expenseId = parseInt(this.dataset.id);
@@ -470,17 +355,14 @@ function updateNeedsDashboard() {
         const weekId = weekKey === 'fixed_week1' ? 'week1' : weekKey;
         const weekData = AppState.needs[weekKey];
 
-        // Update budget display
-        document.getElementById(`${weekId}-allocated`).textContent = `Rs ${formatCurrency(weekData.allocated)}`;
-        document.getElementById(`${weekId}-spent`).textContent = `Rs ${formatCurrency(weekData.spent)}`;
-        document.getElementById(`${weekId}-remaining`).textContent = `Rs ${formatCurrency(weekData.remaining)}`;
+        document.getElementById(`${weekId}-allocated`).textContent = `Ksh ${formatCurrency(weekData.allocated)}`;
+        document.getElementById(`${weekId}-spent`).textContent = `Ksh ${formatCurrency(weekData.spent)}`;
+        document.getElementById(`${weekId}-remaining`).textContent = `Ksh ${formatCurrency(weekData.remaining)}`;
 
-        // Update progress bar
         const percentage = weekData.allocated > 0 ? (weekData.spent / weekData.allocated) * 100 : 0;
         document.getElementById(`${weekId}-percentage`).textContent = `${Math.min(100, percentage).toFixed(1)}%`;
         document.getElementById(`${weekId}-progress`).style.width = `${Math.min(100, percentage)}%`;
 
-        // Update status badge
         const badge = document.getElementById(`${weekId}-status`);
         let status = 'on-budget';
         let statusText = 'On Budget';
@@ -502,20 +384,32 @@ function updateNeedsDashboard() {
         badge.setAttribute('data-status', status);
         badge.textContent = statusText;
 
-        // Update alert message
+        // Update alert messages only when necessary
         const alertElement = document.getElementById(`${weekId}-alert`);
         if (weekData.remaining < 0) {
-            alertElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>You overspent by Rs ${formatCurrency(Math.abs(weekData.remaining))}</span>`;
-            alertElement.className = 'alert-message danger';
-        } else if (percentage < 50) {
-            alertElement.innerHTML = `<i class="fas fa-trophy"></i><span>Great! You saved Rs ${formatCurrency(weekData.remaining)} this week</span>`;
+            // Only show if overspent by more than 100
+            if (Math.abs(weekData.remaining) > 100) {
+                alertElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Overspent by Ksh ${formatCurrency(Math.abs(weekData.remaining))}</span>`;
+                alertElement.className = 'alert-message danger';
+                alertElement.style.display = 'flex';
+            } else {
+                alertElement.style.display = 'none';
+            }
+        } else if (percentage < 50 && weekData.remaining > 1000) {
+            // Only show "saved" message if remaining is significant
+            alertElement.innerHTML = `<i class="fas fa-trophy"></i><span>Saved Ksh ${formatCurrency(weekData.remaining)} this week</span>`;
             alertElement.className = 'alert-message success';
+            alertElement.style.display = 'flex';
+        } else if (percentage >= 90) {
+            // Only show warning if close to budget limit
+            alertElement.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>Approaching budget limit</span>`;
+            alertElement.className = 'alert-message warning';
+            alertElement.style.display = 'flex';
         } else {
-            alertElement.innerHTML = `<i class="fas fa-check-circle"></i><span>You are on budget</span>`;
-            alertElement.className = 'alert-message';
+            // Hide the alert element when no special condition is met
+            alertElement.style.display = 'none';
         }
 
-        // Update expenses list
         updateWeekExpensesList(weekId, weekData.expenses);
     });
 }
@@ -529,7 +423,7 @@ function updateWeekExpensesList(weekId, expenses) {
         return;
     }
 
-    expenses.slice(-5).forEach(expense => { // Show last 5 expenses
+    expenses.slice(-5).forEach(expense => {
         const item = document.createElement('div');
         item.className = 'expense-item';
         item.innerHTML = `
@@ -537,65 +431,63 @@ function updateWeekExpensesList(weekId, expenses) {
                 <strong>${expense.description}</strong>
                 <small class="text-muted">${formatDate(expense.date)}</small>
             </div>
-            <div class="expense-amount negative">-Rs ${formatCurrency(expense.amount)}</div>
+            <div class="expense-amount negative">-Ksh ${formatCurrency(expense.amount)}</div>
         `;
         container.appendChild(item);
     });
 }
 
 function updateIncomeDashboard() {
-    // Update flow diagram
     const flowAllowance = document.getElementById('flow-allowance');
     const flowNeeds = document.getElementById('flow-needs');
     const flowIncome = document.getElementById('flow-income');
     const flowSavings = document.getElementById('flow-savings');
     const flowPersonal = document.getElementById('flow-personal');
 
-    if (flowAllowance) flowAllowance.textContent = `Rs ${formatCurrency(AppState.monthlyAllowance)}`;
+    if (flowAllowance) flowAllowance.textContent = `Ksh ${formatCurrency(AppState.monthlyAllowance)}`;
 
     const totalNeedsAllocated = Object.values(AppState.needs).reduce((sum, week) => sum + week.allocated, 0);
-    if (flowNeeds) flowNeeds.textContent = `Rs ${formatCurrency(totalNeedsAllocated)}`;
+    if (flowNeeds) flowNeeds.textContent = `Ksh ${formatCurrency(totalNeedsAllocated)}`;
 
-    if (flowIncome) flowIncome.textContent = `Rs ${formatCurrency(AppState.income.total)}`;
-    if (flowSavings) flowSavings.textContent = `Rs ${formatCurrency(AppState.income.savings.balance)}`;
-    if (flowPersonal) flowPersonal.textContent = `Rs ${formatCurrency(AppState.income.personal.balance)}`;
+    if (flowIncome) flowIncome.textContent = `Ksh ${formatCurrency(AppState.income.total)}`;
+    if (flowSavings) flowSavings.textContent = `Ksh ${formatCurrency(AppState.income.savings.balance)}`;
+    if (flowPersonal) flowPersonal.textContent = `Ksh ${formatCurrency(AppState.income.personal.balance)}`;
 
-    // Update savings display
     const savingsBalance = document.getElementById('savings-balance');
     const savingsGrowth = document.getElementById('savings-growth');
     const savingsTotal = document.getElementById('savings-total');
 
-    if (savingsBalance) savingsBalance.textContent = `Rs ${formatCurrency(AppState.income.savings.balance)}`;
+    if (savingsBalance) savingsBalance.textContent = `Ksh ${formatCurrency(AppState.income.savings.balance)}`;
 
     const savingsMonthGrowth = AppState.income.savings.balance;
-    if (savingsGrowth) savingsGrowth.textContent = `+Rs ${formatCurrency(savingsMonthGrowth)}`;
-    if (savingsTotal) savingsTotal.textContent = `Rs ${formatCurrency(AppState.income.savings.balance)}`;
+    if (savingsGrowth) savingsGrowth.textContent = `+Ksh ${formatCurrency(savingsMonthGrowth)}`;
+    if (savingsTotal) savingsTotal.textContent = `Ksh ${formatCurrency(AppState.income.savings.balance)}`;
 
-    // Update savings alert
+    // Update savings alert - only show when balance is very low or very high
     const savingsAlert = document.getElementById('savings-alert');
     if (savingsAlert) {
-        if (AppState.income.savings.balance > 1000) {
-            savingsAlert.innerHTML = `<i class="fas fa-trophy"></i><span>Excellent! You're building great savings habits!</span>`;
-            savingsAlert.className = 'alert-message success';
-        } else if (AppState.income.savings.balance > 0) {
-            savingsAlert.innerHTML = `<i class="fas fa-check-circle"></i><span>Good job! Your savings are growing.</span>`;
-            savingsAlert.className = 'alert-message success';
-        } else {
-            savingsAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Your savings balance is low. Try to save more!</span>`;
+        if (AppState.income.savings.balance <= 0) {
+            savingsAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Savings balance is empty</span>`;
             savingsAlert.className = 'alert-message warning';
+            savingsAlert.style.display = 'flex';
+        } else if (AppState.income.savings.balance > 5000) {
+            savingsAlert.innerHTML = `<i class="fas fa-trophy"></i><span>Great savings progress!</span>`;
+            savingsAlert.className = 'alert-message success';
+            savingsAlert.style.display = 'flex';
+        } else {
+            savingsAlert.style.display = 'none';
         }
     }
 
-    // Update personal spending display
     const personalBalance = document.getElementById('personal-balance');
     const personalSpent = document.getElementById('personal-spent');
     const personalRemaining = document.getElementById('personal-remaining');
     const personalPercentage = document.getElementById('personal-percentage');
     const personalProgress = document.getElementById('personal-progress');
 
-    if (personalBalance) personalBalance.textContent = `Rs ${formatCurrency(AppState.income.personal.balance)}`;
-    if (personalSpent) personalSpent.textContent = `Rs ${formatCurrency(AppState.income.personal.spent)}`;
-    if (personalRemaining) personalRemaining.textContent = `Rs ${formatCurrency(AppState.income.personal.balance)}`;
+    if (personalBalance) personalBalance.textContent = `Ksh ${formatCurrency(AppState.income.personal.balance)}`;
+    if (personalSpent) personalSpent.textContent = `Ksh ${formatCurrency(AppState.income.personal.spent)}`;
+    if (personalRemaining) personalRemaining.textContent = `Ksh ${formatCurrency(AppState.income.personal.balance)}`;
 
     const personalTotal = AppState.income.personal.balance + AppState.income.personal.spent;
     const personalUsagePercentage = personalTotal > 0 ? (AppState.income.personal.spent / personalTotal) * 100 : 0;
@@ -603,29 +495,27 @@ function updateIncomeDashboard() {
     if (personalPercentage) personalPercentage.textContent = `${personalUsagePercentage.toFixed(1)}%`;
     if (personalProgress) personalProgress.style.width = `${Math.min(100, personalUsagePercentage)}%`;
 
-    // Update personal alert
+    // Update personal alert - only show warnings when necessary
     const personalAlert = document.getElementById('personal-alert');
     if (personalAlert) {
-        if (personalUsagePercentage > 80) {
-            personalAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Warning: You've used ${personalUsagePercentage.toFixed(1)}% of your personal budget!</span>`;
+        if (personalUsagePercentage > 95) {
+            personalAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Personal budget almost depleted!</span>`;
             personalAlert.className = 'alert-message danger';
+            personalAlert.style.display = 'flex';
             if (personalProgress) personalProgress.style.background = 'linear-gradient(90deg, var(--error-color), #f87171)';
-        } else if (personalUsagePercentage > 50) {
-            personalAlert.innerHTML = `<i class="fas fa-info-circle"></i><span>You've used ${personalUsagePercentage.toFixed(1)}% of your personal budget</span>`;
+        } else if (personalUsagePercentage > 80 && AppState.income.personal.balance < 500) {
+            personalAlert.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>Low personal budget remaining</span>`;
             personalAlert.className = 'alert-message warning';
+            personalAlert.style.display = 'flex';
             if (personalProgress) personalProgress.style.background = 'linear-gradient(90deg, var(--warning-color), #fbbf24)';
         } else {
-            personalAlert.innerHTML = `<i class="fas fa-check-circle"></i><span>You're staying within budget</span>`;
-            personalAlert.className = 'alert-message';
+            personalAlert.style.display = 'none';
             if (personalProgress) personalProgress.style.background = 'var(--primary-gradient)';
         }
     }
 
-    // Update expense lists
     updateCategoryExpensesList('savings-expenses', AppState.income.savings.expenses);
     updateCategoryExpensesList('personal-expenses', AppState.income.personal.expenses);
-
-    // Update transactions table
     updateTransactionsTable();
 }
 
@@ -663,7 +553,7 @@ function updateCategoryExpensesList(containerId, expenses) {
                 <strong>${expense.description}</strong>
                 <small class="text-muted">${formatDate(expense.date)}</small>
             </div>
-            <div class="expense-amount negative">-Rs ${formatCurrency(expense.amount)}</div>
+            <div class="expense-amount negative">-Ksh ${formatCurrency(expense.amount)}</div>
         `;
         container.appendChild(item);
     });
@@ -674,11 +564,8 @@ function updateTransactionsTable() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-
-    // Combine all transactions
     const allTransactions = [];
 
-    // Add needs expenses
     Object.keys(AppState.needs).forEach(category => {
         AppState.needs[category].expenses.forEach(expense => {
             allTransactions.push({
@@ -690,7 +577,6 @@ function updateTransactionsTable() {
         });
     });
 
-    // Add income expenses
     ['savings', 'personal'].forEach(category => {
         AppState.income[category].expenses.forEach(expense => {
             allTransactions.push({
@@ -702,7 +588,6 @@ function updateTransactionsTable() {
         });
     });
 
-    // Sort by date (newest first) and show last 15
     allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
     const recentTransactions = allTransactions.slice(0, 15);
 
@@ -713,19 +598,14 @@ function updateTransactionsTable() {
             <td><span class="badge ${transaction.type === 'Need' ? 'data-status="underspent"' : ''}">${transaction.type}</span></td>
             <td>${transaction.description}</td>
             <td>${transaction.category}</td>
-            <td class="${transaction.amount > 0 ? 'text-danger' : 'text-success'}">${transaction.amount > 0 ? '-' : '+'}Rs ${formatCurrency(Math.abs(transaction.amount))}</td>
-            <td>Rs ${formatCurrency(transaction.balance)}</td>
+            <td class="${transaction.amount > 0 ? 'text-danger' : 'text-success'}">${transaction.amount > 0 ? '-' : '+'}Ksh ${formatCurrency(Math.abs(transaction.amount))}</td>
+            <td>Ksh ${formatCurrency(transaction.balance)}</td>
         `;
         tbody.appendChild(row);
     });
 }
 
-// ===========================
-// CHARTS
-// ===========================
-
 function initCharts() {
-    // Initialize bar chart for needs
     const barCanvas = document.getElementById('needs-bar-chart');
     if (barCanvas) {
         const barCtx = barCanvas.getContext('2d');
@@ -774,7 +654,7 @@ function initCharts() {
                         ticks: {
                             color: 'rgba(255, 255, 255, 0.8)',
                             callback: function(value) {
-                                return 'Rs ' + formatCurrency(value);
+                                return 'Ksh ' + formatCurrency(value);
                             }
                         },
                         grid: {
@@ -786,7 +666,6 @@ function initCharts() {
         });
     }
 
-    // Initialize pie chart for money flow
     const pieCanvas = document.getElementById('money-pie-chart');
     if (pieCanvas) {
         const pieCtx = pieCanvas.getContext('2d');
@@ -830,7 +709,7 @@ function initCharts() {
                                 const value = context.raw || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return `${label}: Rs ${formatCurrency(value)} (${percentage}%)`;
+                                return `${label}: Ksh ${formatCurrency(value)} (${percentage}%)`;
                             }
                         }
                     }
@@ -842,7 +721,6 @@ function initCharts() {
 
 function updateCharts() {
     if (needsBarChart) {
-        // Update bar chart data
         needsBarChart.data.datasets[0].data = [
             AppState.needs.fixed_week1.allocated,
             AppState.needs.week2.allocated,
@@ -861,12 +739,10 @@ function updateCharts() {
     }
 
     if (moneyPieChart) {
-        // Calculate totals for pie chart
         const totalNeedsSpent = Object.values(AppState.needs).reduce((sum, week) => sum + week.spent, 0);
         const totalSavings = AppState.income.savings.balance + AppState.income.savings.spent;
         const totalPersonal = AppState.income.personal.balance + AppState.income.personal.spent;
 
-        // Update pie chart data
         moneyPieChart.data.datasets[0].data = [
             totalNeedsSpent,
             totalSavings,
@@ -877,12 +753,7 @@ function updateCharts() {
     }
 }
 
-// ===========================
-// UTILITY FUNCTIONS
-// ===========================
-
 function formatCurrency(amount) {
-    // Format number with 2 decimal places and comma separators
     return parseFloat(amount).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -928,11 +799,9 @@ function deleteExpense(expenseId) {
         return;
     }
 
-    // Find and remove expense from all places
     let expenseFound = false;
     let deletedExpense = null;
 
-    // Check needs expenses
     Object.keys(AppState.needs).forEach(category => {
         const index = AppState.needs[category].expenses.findIndex(e => e.id === expenseId);
         if (index > -1) {
@@ -944,7 +813,6 @@ function deleteExpense(expenseId) {
         }
     });
 
-    // Check income expenses
     if (!expenseFound) {
         ['savings', 'personal'].forEach(category => {
             const index = AppState.income[category].expenses.findIndex(e => e.id === expenseId);
@@ -957,43 +825,31 @@ function deleteExpense(expenseId) {
             }
         });
     }
-
-    // Remove from all expenses
     if (expenseFound) {
         const allIndex = AppState.allExpenses.findIndex(e => e.id === expenseId);
         if (allIndex > -1) {
             AppState.allExpenses.splice(allIndex, 1);
         }
 
-        // Recalculate income if needs expense was deleted
         if (deletedExpense && (deletedExpense.category.startsWith('week') || deletedExpense.category === 'fixed_week1')) {
             calculateIncome();
         }
 
         updateAllDisplays();
         saveToLocalStorage();
-
-        showNotification('Expense deleted successfully', 'success');
+        // No success notification for deletion
     }
 }
-
-// ===========================
-// MONTH MANAGEMENT
-// ===========================
 
 function resetMonth() {
     showAlert('Reset Month',
         `Are you sure you want to reset everything for a new month?
         This will clear all expenses but keep your savings balance.`,
         () => {
-            // Carry forward savings
             const carrySavings = AppState.income.savings.balance;
-
-            // Reset all state except savings
             const monthlyAllowance = AppState.monthlyAllowance;
             const fixedWeek1Budget = AppState.fixedWeek1Budget;
 
-            // Clear state
             Object.assign(AppState, {
                 monthlyAllowance: monthlyAllowance,
                 fixedWeek1Budget: fixedWeek1Budget,
@@ -1045,29 +901,33 @@ function resetMonth() {
                 currentMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
                 lastResetDate: new Date().toISOString().split('T')[0]
             });
-
-            // Update month display to current month
             updateMonthDisplay();
-
-            // Update UI
             updateAllDisplays();
             saveToLocalStorage();
-
-            // Update month display
             document.getElementById('current-month').textContent = AppState.currentMonth;
-
-            showNotification('Month reset successfully! Savings carried forward.', 'success');
         }
     );
 }
 
-// ===========================
-// NOTIFICATION SYSTEM
-// ===========================
+function showWelcomeNotification() {
+    // Only show welcome notification if it's the first time or after a long time
+    const lastVisit = localStorage.getItem('last-visit');
+    const now = new Date().getTime();
+
+    if (!lastVisit || (now - parseInt(lastVisit)) > 24 * 60 * 60 * 1000) {
+        showNotification('Welcome to Expensify!', 'success');
+        localStorage.setItem('last-visit', now.toString());
+    }
+}
 
 function showNotification(message, type = 'info') {
     const container = document.getElementById('notification-container');
     if (!container) return;
+
+    // Don't show success notifications for minor actions
+    if (type === 'success' && (message.includes('added') || message.includes('deleted'))) {
+        return;
+    }
 
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -1079,8 +939,6 @@ function showNotification(message, type = 'info') {
     `;
 
     container.appendChild(notification);
-
-    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (notification.parentNode) {
             notification.style.animation = 'fadeOut 0.5s ease forwards';
@@ -1090,7 +948,7 @@ function showNotification(message, type = 'info') {
                 }
             }, 500);
         }
-    }, 5000);
+    }, 3000); // Shorter duration for notifications
 }
 
 function showAlert(title, message, onConfirm = null) {
@@ -1110,8 +968,6 @@ function showAlert(title, message, onConfirm = null) {
         if (onConfirm) onConfirm();
         closeModal();
     };
-
-    // Remove old listeners
     confirmButton.replaceWith(confirmButton.cloneNode(true));
     const newConfirmButton = document.getElementById('modal-confirm');
 
@@ -1125,10 +981,6 @@ function closeModal() {
     }
 }
 
-// ===========================
-// LOCAL STORAGE
-// ===========================
-
 function saveToLocalStorage() {
     try {
         const data = {
@@ -1139,7 +991,7 @@ function saveToLocalStorage() {
         localStorage.setItem('waseth-budget-app', JSON.stringify(data));
     } catch (error) {
         console.error('Failed to save to localStorage:', error);
-        showNotification('Failed to save data. Please check your browser storage.', 'danger');
+        // Don't show notification for storage errors unless it's critical
     }
 }
 
@@ -1149,20 +1001,16 @@ function loadFromLocalStorage() {
         if (saved) {
             const data = JSON.parse(saved);
 
-            // Migrate from old version if needed
             if (data.version === '1.0') {
-                // Convert old integer values to decimal
                 migrateFromVersion1(data.state);
             }
 
-            // Check if data is from today, otherwise reset
             const today = new Date().toISOString().split('T')[0];
             if (data.state.lastResetDate === today) {
                 Object.assign(AppState, data.state);
             }
         }
 
-        // Load theme preference
         const savedTheme = localStorage.getItem('budget-theme');
         if (savedTheme === 'light') {
             document.documentElement.setAttribute('data-theme', 'light');
@@ -1171,44 +1019,34 @@ function loadFromLocalStorage() {
         }
     } catch (error) {
         console.error('Failed to load from localStorage:', error);
-        showNotification('Failed to load saved data. Starting fresh.', 'warning');
+        // Don't show notification for load errors
     }
 }
 
 function migrateFromVersion1(oldState) {
-    // Convert integer values to decimal
     if (oldState.monthlyAllowance) oldState.monthlyAllowance = parseFloat(oldState.monthlyAllowance);
     if (oldState.fixedWeek1Budget) oldState.fixedWeek1Budget = parseFloat(oldState.fixedWeek1Budget);
     if (oldState.weeks2to4Budget) oldState.weeks2to4Budget = parseFloat(oldState.weeks2to4Budget);
 
-    // Convert needs values
     Object.keys(oldState.needs).forEach(key => {
         oldState.needs[key].allocated = parseFloat(oldState.needs[key].allocated || 0);
         oldState.needs[key].spent = parseFloat(oldState.needs[key].spent || 0);
         oldState.needs[key].remaining = parseFloat(oldState.needs[key].remaining || 0);
 
-        // Convert expense amounts
         oldState.needs[key].expenses.forEach(expense => {
             expense.amount = parseFloat(expense.amount || 0);
         });
     });
 
-    // Convert income values
     oldState.income.total = parseFloat(oldState.income.total || 0);
     oldState.income.savings.balance = parseFloat(oldState.income.savings.balance || 0);
     oldState.income.savings.spent = parseFloat(oldState.income.savings.spent || 0);
     oldState.income.personal.balance = parseFloat(oldState.income.personal.balance || 0);
     oldState.income.personal.spent = parseFloat(oldState.income.personal.spent || 0);
 
-    // Convert all expenses
     oldState.allExpenses.forEach(expense => {
         expense.amount = parseFloat(expense.amount || 0);
     });
 }
 
-// ===========================
-// INITIALIZE APP
-// ===========================
-
-// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', initApp);

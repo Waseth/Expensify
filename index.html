@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta chaKshet="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expensify</title>
     <link rel="stylesheet" href="style.css">
@@ -17,7 +17,7 @@
             <img src="logo.png" alt="logo" class="logo-image">
             <h1>xpensify</h1>
         </div>
-        
+
         <div class="nav-links">
             <button class="nav-btn active" data-dashboard="input">
                 Input Dashboard
@@ -38,7 +38,6 @@
             </button>
         </div>
     </nav>
-
 
     <main class="container">
 
@@ -70,30 +69,29 @@
                                 <i class="fas fa-coins"></i>Fixed + Week 1 Budget
                             </label>
                             <div class="input-with-icon">
-                                <span class="currency">Rs</span>
-                                <input type="number" id="fixed-week1-budget" min="0" step="100" placeholder="8,000">
+                                <span class="currency">Ksh</span>
+                                <input type="number" id="fixed-week1-budget">
                             </div>
-                            <small class="helper-text">Enter your needs budget for the first week</small>
+                            <small class="helper-text">Enter your needs budget for the fiKsht week</small>
                         </div>
 
                         <div class="form-group">
                             <label for="weeks2-4-budget">
                                 <i class="fas fa-coins"></i> Weeks 2-4 Budget (each)
                             </label>
-                            <div class="readonly-input" id="weeks2-4-budget">Rs 0</div>
+                            <div class="readonly-input" id="weeks2-4-budget">Ksh</div>
                             <small class="helper-text">Auto-calculated from remaining allowance</small>
                         </div>
 
                         <button id="update-budget" class="btn-primary">
-                            <i class="fas fa-save"></i> Update Budget Plan
+                          Update Budget Plan
                         </button>
                     </div>
                 </div>
 
-
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-receipt"></i> Add Expense</h3>
+                        <h3> Add Expense</h3>
                     </div>
                     <div class="card-body">
                         <form id="expense-form">
@@ -110,7 +108,7 @@
                                         <option value="week4">Week 4 Needs</option>
                                     </optgroup>
                                     <optgroup label="Income">
-                                        <option value="personal">Personal Spending</option>
+                                        <option value="peKshonal">PeKshonal Spending</option>
                                         <option value="savings">Savings</option>
                                     </optgroup>
                                 </select>
@@ -126,11 +124,11 @@
 
                             <div class="form-group">
                                 <label for="expense-amount">
-                                    <i class="fas fa-money-bill"></i> Amount
+                                    <i class="fas fa-coins"></i> Amount
                                 </label>
                                 <div class="input-with-icon">
-                                    <span class="currency">Rs</span>
-                                    <input type="number" id="expense-amount" min="0" step="10" placeholder="0" required>
+                                    <span class="currency">Ksh </span>
+                                    <input type="number" id="expense-amount" required>
                                 </div>
                             </div>
 
@@ -142,16 +140,15 @@
                             </div>
 
                             <button type="submit" class="btn-primary">
-                                <i class="fas fa-plus-circle"></i> Add Expense
+                                Add Expense
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Recent Expenses Card -->
                 <div class="card full-width">
                     <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Recent Expenses</h3>
+                        <h3>Recent Expenses</h3>
                     </div>
                     <div class="card-body">
                         <div class="table-container">
@@ -173,51 +170,49 @@
                     </div>
                 </div>
 
-                <!-- Summary Card -->
-                <div class="card">
+
+                <div class="card" id="budget-card">
                     <div class="card-header">
-                        <h3><i class="fas fa-chart-pie"></i> Budget Summary</h3>
+                        <h3> Budget Summary</h3>
                     </div>
                     <div class="card-body">
                         <div class="summary-item">
                             <span class="summary-label">Monthly Allowance</span>
-                            <span class="summary-value" id="summary-allowance">Rs 0</span>
+                            <span class="summary-value" id="summary-allowance">Ksh 0</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Needs Total</span>
-                            <span class="summary-value" id="summary-needs">Rs 0</span>
+                            <span class="summary-value" id="summary-needs">Ksh 0</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Total Spent</span>
-                            <span class="summary-value" id="summary-spent">Rs 0</span>
+                            <span class="summary-value" id="summary-spent">Ksh 0</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Available Income</span>
-                            <span class="summary-value text-success" id="summary-income">Rs 0</span>
+                            <span class="summary-value text-success" id="summary-income">Ksh 0</span>
                         </div>
                         <div class="divider"></div>
                         <div class="summary-item highlight">
                             <span class="summary-label">Savings Balance</span>
-                            <span class="summary-value text-primary" id="summary-savings">Rs 0</span>
+                            <span class="summary-value text-primary" id="summary-savings">Ksh 0</span>
                         </div>
                         <div class="summary-item highlight">
                             <span class="summary-label">Personal Balance</span>
-                            <span class="summary-value text-info" id="summary-personal">Rs 0</span>
+                            <span class="summary-value text-info" id="summary-peKshonal">Ksh 0</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- NEEDS DASHBOARD -->
         <section id="needs-dashboard" class="dashboard">
             <div class="dashboard-header">
-                <h2><i class="fas fa-home"></i> Needs Dashboard</h2>
+                <h2>Needs Dashboard</h2>
                 <p>Track your weekly needs spending</p>
             </div>
 
             <div class="grid-container">
-                <!-- Needs Summary -->
                 <div class="card full-width">
                     <div class="card-header">
                         <h3><i class="fas fa-chart-bar"></i> Weekly Needs Overview</h3>
@@ -239,15 +234,15 @@
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
-                                <span class="budget-value" id="week1-allocated">Rs 0</span>
+                                <span class="budget-value" id="week1-allocated">Ksh 0</span>
                             </div>
                             <div class="budget-item">
                                 <span class="budget-label">Spent</span>
-                                <span class="budget-value" id="week1-spent">Rs 0</span>
+                                <span class="budget-value" id="week1-spent">Ksh 0</span>
                             </div>
                             <div class="budget-item highlight">
                                 <span class="budget-label">Remaining</span>
-                                <span class="budget-value" id="week1-remaining">Rs 0</span>
+                                <span class="budget-value" id="week1-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
@@ -280,15 +275,15 @@
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
-                                <span class="budget-value" id="week2-allocated">Rs 0</span>
+                                <span class="budget-value" id="week2-allocated">Ksh 0</span>
                             </div>
                             <div class="budget-item">
                                 <span class="budget-label">Spent</span>
-                                <span class="budget-value" id="week2-spent">Rs 0</span>
+                                <span class="budget-value" id="week2-spent">Ksh 0</span>
                             </div>
                             <div class="budget-item highlight">
                                 <span class="budget-label">Remaining</span>
-                                <span class="budget-value" id="week2-remaining">Rs 0</span>
+                                <span class="budget-value" id="week2-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
@@ -319,15 +314,15 @@
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
-                                <span class="budget-value" id="week3-allocated">Rs 0</span>
+                                <span class="budget-value" id="week3-allocated">Ksh 0</span>
                             </div>
                             <div class="budget-item">
                                 <span class="budget-label">Spent</span>
-                                <span class="budget-value" id="week3-spent">Rs 0</span>
+                                <span class="budget-value" id="week3-spent">Ksh 0</span>
                             </div>
                             <div class="budget-item highlight">
                                 <span class="budget-label">Remaining</span>
-                                <span class="budget-value" id="week3-remaining">Rs 0</span>
+                                <span class="budget-value" id="week3-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
@@ -358,15 +353,15 @@
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
-                                <span class="budget-value" id="week4-allocated">Rs 0</span>
+                                <span class="budget-value" id="week4-allocated">Ksh 0</span>
                             </div>
                             <div class="budget-item">
                                 <span class="budget-label">Spent</span>
-                                <span class="budget-value" id="week4-spent">Rs 0</span>
+                                <span class="budget-value" id="week4-spent">Ksh 0</span>
                             </div>
                             <div class="budget-item highlight">
                                 <span class="budget-label">Remaining</span>
-                                <span class="budget-value" id="week4-remaining">Rs 0</span>
+                                <span class="budget-value" id="week4-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
@@ -421,7 +416,7 @@
                                 </div>
                                 <div class="flow-content">
                                     <span class="flow-label">Monthly Allowance</span>
-                                    <span class="flow-value" id="flow-allowance">Rs 0</span>
+                                    <span class="flow-value" id="flow-allowance">Ksh 0</span>
                                 </div>
                             </div>
 
@@ -435,7 +430,7 @@
                                 </div>
                                 <div class="flow-content">
                                     <span class="flow-label">Needs Budget</span>
-                                    <span class="flow-value" id="flow-needs">Rs 0</span>
+                                    <span class="flow-value" id="flow-needs">Ksh 0</span>
                                 </div>
                             </div>
 
@@ -449,7 +444,7 @@
                                 </div>
                                 <div class="flow-content">
                                     <span class="flow-label">Income (Surplus/Deficit)</span>
-                                    <span class="flow-value text-success" id="flow-income">Rs 0</span>
+                                    <span class="flow-value text-success" id="flow-income">Ksh 0</span>
                                 </div>
                             </div>
 
@@ -471,7 +466,7 @@
                                     </div>
                                     <div class="flow-content">
                                         <span class="flow-label">Savings</span>
-                                        <span class="flow-value text-primary" id="flow-savings">Rs 0</span>
+                                        <span class="flow-value text-primary" id="flow-savings">Ksh 0</span>
                                     </div>
                                 </div>
 
@@ -480,8 +475,8 @@
                                         <i class="fas fa-gamepad"></i>
                                     </div>
                                     <div class="flow-content">
-                                        <span class="flow-label">Personal</span>
-                                        <span class="flow-value text-info" id="flow-personal">Rs 0</span>
+                                        <span class="flow-label">PeKshonal</span>
+                                        <span class="flow-value text-info" id="flow-peKshonal">Ksh 0</span>
                                     </div>
                                 </div>
                             </div>
@@ -498,15 +493,15 @@
                         <div class="savings-display">
                             <div class="savings-item">
                                 <span class="savings-label">Current Balance</span>
-                                <span class="savings-value" id="savings-balance">Rs 0</span>
+                                <span class="savings-value" id="savings-balance">Ksh 0</span>
                             </div>
                             <div class="savings-item">
                                 <span class="savings-label">This Month's Growth</span>
-                                <span class="savings-value text-success" id="savings-growth">+Rs 0</span>
+                                <span class="savings-value text-success" id="savings-growth">+Ksh 0</span>
                             </div>
                             <div class="savings-item">
                                 <span class="savings-label">Total Saved</span>
-                                <span class="savings-value text-primary" id="savings-total">Rs 0</span>
+                                <span class="savings-value text-primary" id="savings-total">Ksh 0</span>
                             </div>
                         </div>
                         <div class="alert-message success" id="savings-alert">
@@ -519,41 +514,41 @@
                     </div>
                 </div>
 
-                <!-- Personal Spending Card -->
+                <!-- PeKshonal Spending Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-gamepad"></i> Personal Spending</h3>
+                        <h3><i class="fas fa-gamepad"></i> PeKshonal Spending</h3>
                     </div>
                     <div class="card-body">
-                        <div class="personal-display">
-                            <div class="personal-item">
-                                <span class="personal-label">Available Balance</span>
-                                <span class="personal-value" id="personal-balance">Rs 0</span>
+                        <div class="peKshonal-display">
+                            <div class="peKshonal-item">
+                                <span class="peKshonal-label">Available Balance</span>
+                                <span class="peKshonal-value" id="peKshonal-balance">Ksh 0</span>
                             </div>
-                            <div class="personal-item">
-                                <span class="personal-label">Total Spent</span>
-                                <span class="personal-value" id="personal-spent">Rs 0</span>
+                            <div class="peKshonal-item">
+                                <span class="peKshonal-label">Total Spent</span>
+                                <span class="peKshonal-value" id="peKshonal-spent">Ksh 0</span>
                             </div>
-                            <div class="personal-item">
-                                <span class="personal-label">Remaining Budget</span>
-                                <span class="personal-value" id="personal-remaining">Rs 0</span>
+                            <div class="peKshonal-item">
+                                <span class="peKshonal-label">Remaining Budget</span>
+                                <span class="peKshonal-value" id="peKshonal-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
                             <div class="progress-label">
                                 <span>Budget Usage</span>
-                                <span id="personal-percentage">0%</span>
+                                <span id="peKshonal-percentage">0%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" id="personal-progress" style="width: 0%"></div>
+                                <div class="progress-fill" id="peKshonal-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message warning" id="personal-alert">
+                        <div class="alert-message warning" id="peKshonal-alert">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span>You're staying within budget</span>
                         </div>
-                        <div class="personal-history" id="personal-expenses">
-                            <!-- Personal expenses will be listed here -->
+                        <div class="peKshonal-history" id="peKshonal-expenses">
+                            <!-- PeKshonal expenses will be listed here -->
                         </div>
                     </div>
                 </div>
