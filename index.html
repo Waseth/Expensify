@@ -72,7 +72,7 @@
                                 <span class="currency">Ksh</span>
                                 <input type="number" id="fixed-week1-budget">
                             </div>
-                            <small class="helper-text">Enter your needs budget for the fiKsht week</small>
+                            <small class="helper-text">Enter your needs budget for the first week</small>
                         </div>
 
                         <div class="form-group">
@@ -108,7 +108,7 @@
                                         <option value="week4">Week 4 Needs</option>
                                     </optgroup>
                                     <optgroup label="Income">
-                                        <option value="peKshonal">PeKshonal Spending</option>
+                                        <option value="personal">Personal Spending</option>
                                         <option value="savings">Savings</option>
                                     </optgroup>
                                 </select>
@@ -199,7 +199,7 @@
                         </div>
                         <div class="summary-item highlight">
                             <span class="summary-label">Personal Balance</span>
-                            <span class="summary-value text-info" id="summary-peKshonal">Ksh 0</span>
+                            <span class="summary-value text-info" id="summary-personal">Ksh 0</span>
                         </div>
                     </div>
                 </div>
@@ -383,15 +383,13 @@
             </div>
         </section>
 
-        <!-- INCOME DASHBOARD (WASETH'S MONEY) -->
         <section id="income-dashboard" class="dashboard">
             <div class="dashboard-header">
-                <h2><i class="fas fa-money-bill-wave"></i> Waseth's Money Dashboard</h2>
+                <h2>My Money Dashboard</h2>
                 <p>Track your income, savings, and personal spending</p>
             </div>
 
             <div class="grid-container">
-                <!-- Income Overview Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-chart-pie"></i> Money Flow</h3>
@@ -403,7 +401,6 @@
                     </div>
                 </div>
 
-                <!-- Income Summary Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-hand-holding-usd"></i> Income Summary</h3>
@@ -475,8 +472,8 @@
                                         <i class="fas fa-gamepad"></i>
                                     </div>
                                     <div class="flow-content">
-                                        <span class="flow-label">PeKshonal</span>
-                                        <span class="flow-value text-info" id="flow-peKshonal">Ksh 0</span>
+                                        <span class="flow-label">Personal</span>
+                                        <span class="flow-value text-info" id="flow-personal">Ksh 0</span>
                                     </div>
                                 </div>
                             </div>
@@ -484,7 +481,6 @@
                     </div>
                 </div>
 
-                <!-- Savings Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-piggy-bank"></i> Savings</h3>
@@ -514,41 +510,41 @@
                     </div>
                 </div>
 
-                <!-- PeKshonal Spending Card -->
+
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-gamepad"></i> PeKshonal Spending</h3>
+                        <h3><i class="fas fa-gamepad"></i> Personal Spending</h3>
                     </div>
                     <div class="card-body">
-                        <div class="peKshonal-display">
-                            <div class="peKshonal-item">
-                                <span class="peKshonal-label">Available Balance</span>
-                                <span class="peKshonal-value" id="peKshonal-balance">Ksh 0</span>
+                        <div class="personal-display">
+                            <div class="personal-item">
+                                <span class="personal-label">Available Balance</span>
+                                <span class="personal-value" id="personal-balance">Ksh 0</span>
                             </div>
-                            <div class="peKshonal-item">
-                                <span class="peKshonal-label">Total Spent</span>
-                                <span class="peKshonal-value" id="peKshonal-spent">Ksh 0</span>
+                            <div class="personal-item">
+                                <span class="personal-label">Total Spent</span>
+                                <span class="personal-value" id="personal-spent">Ksh 0</span>
                             </div>
-                            <div class="peKshonal-item">
-                                <span class="peKshonal-label">Remaining Budget</span>
-                                <span class="peKshonal-value" id="peKshonal-remaining">Ksh 0</span>
+                            <div class="personal-item">
+                                <span class="personal-label">Remaining Budget</span>
+                                <span class="personal-value" id="personal-remaining">Ksh 0</span>
                             </div>
                         </div>
                         <div class="progress-container">
                             <div class="progress-label">
                                 <span>Budget Usage</span>
-                                <span id="peKshonal-percentage">0%</span>
+                                <span id="personal-percentage">0%</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" id="peKshonal-progress" style="width: 0%"></div>
+                                <div class="progress-fill" id="personal-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message warning" id="peKshonal-alert">
+                        <div class="alert-message warning" id="personal-alert">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span>You're staying within budget</span>
                         </div>
-                        <div class="peKshonal-history" id="peKshonal-expenses">
-                            <!-- PeKshonal expenses will be listed here -->
+                        <div class="personal-history" id="personal-expenses">
+                            <!-- personal expenses will be listed here -->
                         </div>
                     </div>
                 </div>

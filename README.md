@@ -1,6 +1,6 @@
 # Expensify
 
-### A peKshonal money system born from real student life.
+### A personal money system born from real student life.
 
 When I joined univeKshity, my mum sent me a monthly allowance to cover my daily life — food, transport, groceries, and basic needs.
 At fiKsht, I thought budgeting was simple: "Just track what you spend".
@@ -32,7 +32,7 @@ Needs Budget (fixed + weekly)
 ↓ (undeKshpend or oveKshpend)
 My Income (surplus)
 ↓
-Savings (50%) + PeKshonal (50%)
+Savings (50%) + personal (50%)
 
 ```
 
@@ -47,14 +47,14 @@ Every mistake becomes a lesson.
 ### 1. Three Dashboards
 - **Input Dashboard** – enter allowance and expenses
 - **Needs Dashboard** – track fixed and weekly needs vs budget
-- **My Income Dashboard** – view surplus, savings, and peKshonal spending
+- **My Income Dashboard** – view surplus, savings, and personal spending
 
 ### 2. Smart Money Flow
 - UndeKshpending on needs → money is added to *My Income*
 - OveKshpending on needs → money is deducted from *My Income*
 - Income is automatically split:
   - **50% Savings**
-  - **50% PeKshonal**
+  - **50% personal**
 
 ### 3.Budgeting System
 - Allocate money for:

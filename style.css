@@ -64,7 +64,7 @@ body {
 }
 
 .navbar {
-    position: static;
+    position: sticky;
     top: 0;
     z-index: 1000;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -430,6 +430,10 @@ tbody tr:hover {
     align-items: center;
     padding: var(--spacing-sm) 0;
     border-bottom: 1px solid var(--glass-border);
+}
+.budget-item{
+    display: flex;
+    flex-direction: column;
 }
 
 .budget-display:last-child,
