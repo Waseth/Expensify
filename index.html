@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta chaKshet="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expensify</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
-
     <nav class="navbar">
         <div class="nav-brand">
             <img src="logo.png" alt="logo" class="logo-image">
             <h1>xpensify</h1>
         </div>
-
         <div class="nav-links">
-            <button class="nav-btn active" data-dashboard="input">
-                Input Dashboard
-            </button>
-            <button class="nav-btn" data-dashboard="needs">
-                Needs Dashboard
-            </button>
-            <button class="nav-btn" data-dashboard="income">
-                My Money
-            </button>
+            <button class="nav-btn active" data-dashboard="input">Input Dashboard</button>
+            <button class="nav-btn" data-dashboard="needs">Needs Dashboard</button>
+            <button class="nav-btn" data-dashboard="income">My Money Dashboard</button>
         </div>
-
-        <div class="month-display">
-            <span id="current-month">January 2024</span>
-            <button id="reset-month" class="btn-warning">
-                <i class="fas fa-redo"></i>
-                Reset Month
-            </button>
+        <div class="current-week-display">
+            <span id="current-week">Week 1</span>
         </div>
     </nav>
 
-    <main class="container">
+    <div class="month-display-wrapper">
+        <div class="month-display">
+            <span id="current-month">January 2024</span>
+            <div class="action-buttons">
+                <button id="add-external-income" class="btn-secondary">
+                    <i class="fas fa-plus-circle"></i> Add External Income
+                </button>
+                <button id="reset-month" class="btn-warning">
+                    <i class="fas fa-redo"></i> Reset Month
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <main class="container">
         <section id="input-dashboard" class="dashboard active">
             <div class="dashboard-header">
                 <h2>Input Dashboard</h2>
@@ -48,7 +46,6 @@
             </div>
 
             <div class="grid-container">
-
                 <div class="card">
                     <div class="card-header">
                         <h3>Monthly Setup</h3>
@@ -66,7 +63,7 @@
 
                         <div class="form-group">
                             <label for="fixed-week1-budget">
-                                <i class="fas fa-coins"></i>Fixed + Week 1 Budget
+                                <i class="fas fa-coins"></i> Fixed + Week 1 Budget
                             </label>
                             <div class="input-with-icon">
                                 <span class="currency">Ksh</span>
@@ -79,19 +76,17 @@
                             <label for="weeks2-4-budget">
                                 <i class="fas fa-coins"></i> Weeks 2-4 Budget (each)
                             </label>
-                            <div class="readonly-input" id="weeks2-4-budget">Ksh</div>
+                            <div class="readonly-input" id="weeks2-4-budget">Ksh 0</div>
                             <small class="helper-text">Auto-calculated from remaining allowance</small>
                         </div>
 
-                        <button id="update-budget" class="btn-primary">
-                          Update Budget Plan
-                        </button>
+                        <button id="update-budget" class="btn-primary">Update Budget Plan</button>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3> Add Expense</h3>
+                        <h3>Add Expense</h3>
                     </div>
                     <div class="card-body">
                         <form id="expense-form">
@@ -118,8 +113,7 @@
                                 <label for="expense-description">
                                     <i class="fas fa-file-alt"></i> Description
                                 </label>
-                                <input type="text" id="expense-description" placeholder="Lunch, Groceries, Transport..."
-                                    required>
+                                <input type="text" id="expense-description" placeholder="Lunch, Groceries, Transport..." required>
                             </div>
 
                             <div class="form-group">
@@ -127,7 +121,7 @@
                                     <i class="fas fa-coins"></i> Amount
                                 </label>
                                 <div class="input-with-icon">
-                                    <span class="currency">Ksh </span>
+                                    <span class="currency">Ksh</span>
                                     <input type="number" id="expense-amount" required>
                                 </div>
                             </div>
@@ -139,9 +133,7 @@
                                 <input type="date" id="expense-date" required>
                             </div>
 
-                            <button type="submit" class="btn-primary">
-                                Add Expense
-                            </button>
+                            <button type="submit" class="btn-primary">Add Expense</button>
                         </form>
                     </div>
                 </div>
@@ -162,18 +154,15 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <!-- Expenses will be added here dynamically -->
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-
                 <div class="card" id="budget-card">
                     <div class="card-header">
-                        <h3> Budget Summary</h3>
+                        <h3>Budget Summary</h3>
                     </div>
                     <div class="card-body">
                         <div class="summary-item">
@@ -187,10 +176,6 @@
                         <div class="summary-item">
                             <span class="summary-label">Total Spent</span>
                             <span class="summary-value" id="summary-spent">Ksh 0</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Available Income</span>
-                            <span class="summary-value text-success" id="summary-income">Ksh 0</span>
                         </div>
                         <div class="divider"></div>
                         <div class="summary-item highlight">
@@ -224,11 +209,13 @@
                     </div>
                 </div>
 
-                <!-- Week 1 Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar-week"></i> Fixed + Week 1</h3>
-                        <span class="badge" id="week1-status">On Budget</span>
+                        <div class="card-header-actions">
+                            <span class="badge" id="week1-status">On Budget</span>
+                            <button class="end-week-btn btn-secondary" data-week="fixed_week1">End Week</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="budget-display">
@@ -254,24 +241,20 @@
                                 <div class="progress-fill" id="week1-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message" id="week1-alert">
-                            <i class="fas fa-check-circle"></i>
-                            <span>You are on budget</span>
-                        </div>
-                        <div class="expenses-list" id="week1-expenses">
-                            <!-- Expenses will be listed here -->
-                        </div>
+                        <div class="alert-message" id="week1-alert" style="display: none;"></div>
+                        <div class="expenses-list" id="week1-expenses"></div>
                     </div>
                 </div>
 
-                <!-- Week 2 Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar-week"></i> Week 2</h3>
-                        <span class="badge" id="week2-status">On Budget</span>
+                        <div class="card-header-actions">
+                            <span class="badge" id="week2-status">On Budget</span>
+                            <button class="end-week-btn btn-secondary" data-week="week2">End Week</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <!-- Same structure as Week 1 -->
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
@@ -295,22 +278,20 @@
                                 <div class="progress-fill" id="week2-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message" id="week2-alert">
-                            <i class="fas fa-check-circle"></i>
-                            <span>You are on budget</span>
-                        </div>
+                        <div class="alert-message" id="week2-alert" style="display: none;"></div>
                         <div class="expenses-list" id="week2-expenses"></div>
                     </div>
                 </div>
 
-                <!-- Week 3 Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar-week"></i> Week 3</h3>
-                        <span class="badge" id="week3-status">On Budget</span>
+                        <div class="card-header-actions">
+                            <span class="badge" id="week3-status">On Budget</span>
+                            <button class="end-week-btn btn-secondary" data-week="week3">End Week</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <!-- Same structure as Week 1 -->
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
@@ -334,22 +315,20 @@
                                 <div class="progress-fill" id="week3-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message" id="week3-alert">
-                            <i class="fas fa-check-circle"></i>
-                            <span>You are on budget</span>
-                        </div>
+                        <div class="alert-message" id="week3-alert" style="display: none;"></div>
                         <div class="expenses-list" id="week3-expenses"></div>
                     </div>
                 </div>
 
-                <!-- Week 4 Card -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar-week"></i> Week 4</h3>
-                        <span class="badge" id="week4-status">On Budget</span>
+                        <div class="card-header-actions">
+                            <span class="badge" id="week4-status">On Budget</span>
+                            <button class="end-week-btn btn-secondary" data-week="week4">End Week</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <!-- Same structure as Week 1 -->
                         <div class="budget-display">
                             <div class="budget-item">
                                 <span class="budget-label">Allocated</span>
@@ -373,10 +352,7 @@
                                 <div class="progress-fill" id="week4-progress" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="alert-message" id="week4-alert">
-                            <i class="fas fa-check-circle"></i>
-                            <span>You are on budget</span>
-                        </div>
+                        <div class="alert-message" id="week4-alert" style="display: none;"></div>
                         <div class="expenses-list" id="week4-expenses"></div>
                     </div>
                 </div>
@@ -408,69 +384,42 @@
                     <div class="card-body">
                         <div class="income-flow">
                             <div class="flow-step">
-                                <div class="flow-icon">
-                                    <i class="fas fa-money-bill-alt"></i>
-                                </div>
+                                <div class="flow-icon"><i class="fas fa-money-bill-alt"></i></div>
                                 <div class="flow-content">
                                     <span class="flow-label">Monthly Allowance</span>
                                     <span class="flow-value" id="flow-allowance">Ksh 0</span>
                                 </div>
                             </div>
-
-                            <div class="flow-arrow">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
                             <div class="flow-step">
-                                <div class="flow-icon">
-                                    <i class="fas fa-home"></i>
-                                </div>
+                                <div class="flow-icon"><i class="fas fa-home"></i></div>
                                 <div class="flow-content">
                                     <span class="flow-label">Needs Budget</span>
                                     <span class="flow-value" id="flow-needs">Ksh 0</span>
                                 </div>
                             </div>
-
-                            <div class="flow-arrow">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
                             <div class="flow-step">
-                                <div class="flow-icon">
-                                    <i class="fas fa-exchange-alt"></i>
-                                </div>
+                                <div class="flow-icon"><i class="fas fa-coins"></i></div>
                                 <div class="flow-content">
-                                    <span class="flow-label">Income (Surplus/Deficit)</span>
-                                    <span class="flow-value text-success" id="flow-income">Ksh 0</span>
+                                    <span class="flow-label">External Income</span>
+                                    <span class="flow-value text-success" id="flow-external">Ksh 0</span>
                                 </div>
                             </div>
-
                             <div class="flow-split">
-                                <div class="split-arrow">
-                                    <i class="fas fa-arrow-right"></i>
-                                    <span>50%</span>
-                                </div>
-                                <div class="split-arrow">
-                                    <i class="fas fa-arrow-right"></i>
-                                    <span>50%</span>
-                                </div>
+                                <div class="split-arrow"><i class="fas fa-arrow-right"></i><span>50%</span></div>
+                                <div class="split-arrow"><i class="fas fa-arrow-right"></i><span>50%</span></div>
                             </div>
-
                             <div class="flow-split-content">
                                 <div class="flow-step">
-                                    <div class="flow-icon">
-                                        <i class="fas fa-piggy-bank"></i>
-                                    </div>
+                                    <div class="flow-icon"><i class="fas fa-piggy-bank"></i></div>
                                     <div class="flow-content">
                                         <span class="flow-label">Savings</span>
                                         <span class="flow-value text-primary" id="flow-savings">Ksh 0</span>
                                     </div>
                                 </div>
-
                                 <div class="flow-step">
-                                    <div class="flow-icon">
-                                        <i class="fas fa-gamepad"></i>
-                                    </div>
+                                    <div class="flow-icon"><i class="fas fa-gamepad"></i></div>
                                     <div class="flow-content">
                                         <span class="flow-label">Personal</span>
                                         <span class="flow-value text-info" id="flow-personal">Ksh 0</span>
@@ -491,25 +440,11 @@
                                 <span class="savings-label">Current Balance</span>
                                 <span class="savings-value" id="savings-balance">Ksh 0</span>
                             </div>
-                            <div class="savings-item">
-                                <span class="savings-label">This Month's Growth</span>
-                                <span class="savings-value text-success" id="savings-growth">+Ksh 0</span>
-                            </div>
-                            <div class="savings-item">
-                                <span class="savings-label">Total Saved</span>
-                                <span class="savings-value text-primary" id="savings-total">Ksh 0</span>
-                            </div>
                         </div>
-                        <div class="alert-message success" id="savings-alert">
-                            <i class="fas fa-trophy"></i>
-                            <span>Great job! Your savings are growing.</span>
-                        </div>
-                        <div class="savings-history" id="savings-expenses">
-                            <!-- Savings expenses will be listed here -->
-                        </div>
+                        <div class="alert-message" id="savings-alert" style="display: none;"></div>
+                        <div class="savings-history" id="savings-expenses"></div>
                     </div>
                 </div>
-
 
                 <div class="card">
                     <div class="card-header">
@@ -525,31 +460,12 @@
                                 <span class="personal-label">Total Spent</span>
                                 <span class="personal-value" id="personal-spent">Ksh 0</span>
                             </div>
-                            <div class="personal-item">
-                                <span class="personal-label">Remaining Budget</span>
-                                <span class="personal-value" id="personal-remaining">Ksh 0</span>
-                            </div>
                         </div>
-                        <div class="progress-container">
-                            <div class="progress-label">
-                                <span>Budget Usage</span>
-                                <span id="personal-percentage">0%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="personal-progress" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="alert-message warning" id="personal-alert">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>You're staying within budget</span>
-                        </div>
-                        <div class="personal-history" id="personal-expenses">
-                            <!-- personal expenses will be listed here -->
-                        </div>
+                        <div class="alert-message" id="personal-alert" style="display: none;"></div>
+                        <div class="personal-history" id="personal-expenses"></div>
                     </div>
                 </div>
 
-                <!-- Recent Transactions -->
                 <div class="card full-width">
                     <div class="card-header">
                         <h3><i class="fas fa-list-alt"></i> Recent Transactions</h3>
@@ -567,9 +483,7 @@
                                         <th>Balance</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <!-- Transactions will be added here -->
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -578,10 +492,38 @@
         </section>
     </main>
 
-    <!-- Notification System -->
     <div id="notification-container"></div>
 
-    <!-- Alert Modal -->
+    <div id="external-income-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add External Income</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="external-income-amount"><i class="fas fa-coins"></i> Amount</label>
+                    <div class="input-with-icon">
+                        <span class="currency">Ksh</span>
+                        <input type="number" id="external-income-amount" placeholder="Enter amount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="external-income-description"><i class="fas fa-file-alt"></i> Description (Optional)</label>
+                    <input type="text" id="external-income-description" placeholder="Bonus, Gift, Side hustle...">
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>This income will be split 50/50 between Savings and Personal balance</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="external-income-cancel">Cancel</button>
+                <button class="btn-primary" id="external-income-submit">Add Income</button>
+            </div>
+        </div>
+    </div>
+
     <div id="alert-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -597,7 +539,47 @@
         </div>
     </div>
 
+    <div id="end-week-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="end-week-title">End Week</h3>
+                <button class="modal-close end-week-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="end-week-summary">
+                    <h4 id="end-week-name">Week 1</h4>
+                    <div class="summary-grid">
+                        <div class="summary-row">
+                            <span class="summary-label">Allocated Budget:</span>
+                            <span class="summary-value" id="end-week-allocated">Ksh 0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Total Spent:</span>
+                            <span class="summary-value text-danger" id="end-week-spent">Ksh 0.00</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="summary-row highlight">
+                            <span class="summary-label" id="end-week-result-label">Surplus:</span>
+                            <span class="summary-value" id="end-week-result">Ksh 0.00</span>
+                        </div>
+                    </div>
+                    <div class="info-box" id="end-week-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="end-week-info-text">This surplus will be split 50/50 between Savings and Personal balance.</span>
+                    </div>
+                    <div class="warning-box" style="display: none;" id="end-week-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Once ended, you cannot add more expenses to this week.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="end-week-cancel">Cancel</button>
+                <button class="btn-primary" id="end-week-confirm">End Week</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
-
 </html>
