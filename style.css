@@ -41,9 +41,9 @@
 [data-theme="light"] {
     --dark-bg: #f8f9fa;
     --darker-bg: #e9ecef;
-    --text-primary: #2d3436;
-    --text-secondary: rgba(45, 52, 54, 0.8);
-    --text-muted: rgba(45, 52, 54, 0.6);
+    --text-primary: #000000;
+    --text-secondary: rgb(0, 0, 0);
+    --text-muted: rgb(0, 0, 0);
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(94, 58, 238, 0.1);
 }
@@ -80,7 +80,7 @@ body {
 
 .nav-brand {
     display: flex;
-    align-items: center;
+    margin-left: -25px;
     margin-top: -10px;
     margin-bottom: -20px;
 }
@@ -88,7 +88,7 @@ body {
 .nav-brand img {
     width: 55px;
     margin-right: -12px;
-    margin-top: -6px;
+    margin-top: -10px;
 }
 
 .nav-brand h1 {
@@ -100,17 +100,42 @@ body {
     font-weight: 800;
 }
 
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all var(--transition-fast);
+}
+
+.nav-toggle:hover {
+    background: rgba(94, 58, 238, 0.1);
+    transform: scale(1.05);
+}
+
 .nav-links {
     display: flex;
     gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.nav-links.active {
+    display: flex;
 }
 
 .nav-btn {
+    flex: 1;
+    min-width: 100px;
+    max-width: 200px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--radius-md);
+    padding: 8px 0;
+    border-radius: 8px;
     cursor: pointer;
     gap: var(--spacing-xs);
     transition: all var(--transition-fast);
@@ -136,12 +161,10 @@ body {
 }
 
 .current-week-display {
-    margin-left: auto;
-    margin-right: 20px;
     background: var(--glass-bg);
     padding: 8px 16px;
     border-radius: 20px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(94, 58, 238, 0.3);
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -164,18 +187,19 @@ body {
 
 .action-buttons {
     display: flex;
-    gap: 10px;
+    gap: 3px;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 #reset-month {
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 #add-external-income {
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 #current-month {
@@ -210,9 +234,9 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-size: 2rem;
+    font-size: 14px;
     margin-bottom: var(--spacing-sm);
-    font-weight: 600;
+    font-weight: 800;
 }
 
 .dashboard-header p {
@@ -237,6 +261,23 @@ input[type=number]::-webkit-outer-spin-button {
     grid-column: 1 / -1;
 }
 
+.full-height {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-height .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-height .chart-container,
+.full-height .income-flow {
+    flex: 1;
+}
+
 .card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -250,7 +291,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-1px);
     box-shadow: 0 12px 40px rgba(94, 58, 238, 0.3);
     border-color: rgba(94, 58, 238, 0.5);
 }
@@ -260,7 +301,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-bottom: 1px solid var(--glass-border);
     background: linear-gradient(90deg, rgba(94, 58, 238, 0.2), rgba(197, 107, 240, 0.1));
     display: flex;
-    justify-content: space-between;
+    gap: 18px;
+    flex-direction: column;
     align-items: center;
 }
 
@@ -275,11 +317,29 @@ input[type=number]::-webkit-outer-spin-button {
 .card-header-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
 }
 
 .card-body {
     padding: var(--spacing-lg);
+}
+
+#add-external-income{
+    margin: 10px;
+}
+
+#reset-month{
+    margin-right: 10px;
+}
+
+#add-external-income:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(94, 58, 238, 0.4);
+}
+
+#reset-month:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(94, 58, 238, 0.4);
 }
 
 .btn-primary, .btn-secondary, .btn-warning {
@@ -296,9 +356,6 @@ input[type=number]::-webkit-outer-spin-button {
     text-decoration: none;
     position: relative;
     overflow: hidden;
-}
-
-.btn-primary {
     background: var(--primary-gradient);
     color: white;
     box-shadow: 0 4px 15px rgba(94, 58, 238, 0.3);
@@ -318,31 +375,10 @@ input[type=number]::-webkit-outer-spin-button {
     cursor: not-allowed;
 }
 
-.btn-secondary {
-    background: transparent;
-    border: 2px solid var(--accent-color);
-    color: var(--accent-color);
-}
-
-.btn-secondary:hover:not(:disabled) {
-    background: rgba(94, 58, 238, 0.1);
-    transform: translateY(-2px);
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, var(--warning-color), #f1c40f);
-    color: white;
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-}
-
-.btn-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
-}
-
 .end-week-btn {
-    padding: 6px 12px;
+    padding: 8px 20px;
     font-size: 0.9rem;
+    border-radius: 10px;
 }
 
 .form-group {
@@ -362,7 +398,7 @@ input[type=number]::-webkit-outer-spin-button {
 input, select, textarea {
     width: 100%;
     padding: var(--spacing-sm);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(94, 58, 238, 0.3);
     border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
@@ -374,6 +410,7 @@ input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(94, 58, 238, 0.3) ;
 }
 
 option {
@@ -588,8 +625,8 @@ tbody tr:hover {
 }
 
 .badge {
-    padding: 4px 12px;
-    border-radius: 20px;
+    padding: 8px 12px;
+    border-radius: 10px;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -853,6 +890,21 @@ tbody tr:hover {
     padding: var(--spacing-lg);
 }
 
+.modal-body ul {
+    list-style-type: disc;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.modal-body ul li {
+    margin: 8px 0;
+}
+
+.modal-body p {
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
 .modal-footer {
     padding: var(--spacing-md) var(--spacing-lg);
     border-top: 1px solid var(--glass-border);
@@ -1110,151 +1162,6 @@ tbody tr:hover {
     margin: var(--spacing-md) 0;
 }
 
-/* Alert Modal Scrollable Styles */
-#alert-modal .modal-content {
-    max-height: 90vh; /* Limit the maximum height */
-    display: flex;
-    flex-direction: column;
-}
-
-#alert-modal .modal-body {
-    flex: 1;
-    overflow-y: auto; /* Make the body scrollable */
-    max-height: calc(80vh - 120px); /* Adjust based on header and footer heights */
-    padding-right: 8px; /* Add some padding for scrollbar */
-}
-
-#alert-modal .modal-body p {
-    white-space: pre-line; /* Preserve line breaks from JavaScript */
-    word-wrap: break-word; /* Break long words */
-    overflow-wrap: break-word; /* Modern property for word breaking */
-}
-
-/* Custom scrollbar for alert modal */
-#alert-modal .modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-#alert-modal .modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-#alert-modal .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(94, 58, 238, 0.5);
-    border-radius: 3px;
-}
-
-#alert-modal .modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(94, 58, 238, 0.8);
-}
-
-/* For Firefox */
-#alert-modal .modal-body {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(94, 58, 238, 0.5) rgba(255, 255, 255, 0.05);
-}
-
-/* For the end week modal, you might want similar styles */
-#end-week-modal .modal-content {
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-#end-week-modal .modal-body {
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(80vh - 120px);
-    padding-right: 8px;
-}
-
-#end-week-modal .modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-#end-week-modal .modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-#end-week-modal .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(94, 58, 238, 0.5);
-    border-radius: 3px;
-}
-
-#end-week-modal .modal-body {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(94, 58, 238, 0.5) rgba(255, 255, 255, 0.05);
-}
-
-/* For the external income modal */
-#external-income-modal .modal-content {
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-}
-
-#external-income-modal .modal-body {
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(80vh - 120px);
-    padding-right: 8px;
-}
-
-#external-income-modal .modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-#external-income-modal .modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-#external-income-modal .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(94, 58, 238, 0.5);
-    border-radius: 3px;
-}
-
-#external-income-modal .modal-body {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(94, 58, 238, 0.5) rgba(255, 255, 255, 0.05);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #alert-modal .modal-content,
-    #end-week-modal .modal-content,
-    #external-income-modal .modal-content {
-        width: 95%;
-        margin: 10px;
-    }
-
-    #alert-modal .modal-body,
-    #end-week-modal .modal-body,
-    #external-income-modal .modal-body {
-        max-height: calc(70vh - 120px);
-    }
-}
-
-/* Optional: Add fade effect at the bottom to indicate more content */
-#alert-modal .modal-body::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 8px;
-    height: 20px;
-    background: linear-gradient(to bottom, transparent, var(--glass-bg));
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#alert-modal .modal-body.scrolled::after {
-    opacity: 1;
-}
-
 @media (max-width: 1200px) {
     .grid-container {
         grid-template-columns: repeat(2, 1fr);
@@ -1263,19 +1170,39 @@ tbody tr:hover {
 
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        gap: var(--spacing-md);
+        flex-wrap: wrap;
         padding: var(--spacing-md);
     }
 
-    .nav-links {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
+    .nav-toggle {
+        display: block;
+        order: 2;
+    }
+
+    .nav-brand {
+        order: 1;
     }
 
     .current-week-display {
+        order: 1;
         margin: 0;
+    }
+
+    .nav-links {
+        display: none;
+        order: 4;
+        width: 100%;
+        flex-direction: column;
+        margin-top: var(--spacing-md);
+        gap: var(--spacing-sm);
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-btn {
+        width: 100%;
     }
 
     .month-display {

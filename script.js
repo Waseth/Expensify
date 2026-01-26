@@ -36,12 +36,22 @@ function initApp() {
     updateAllDisplays();
     checkWeekProgress();
     setupThemeToggler();
-    setupModalScroll()
 }
 
 function setupEventListeners() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchDashboard(btn.dataset.dashboard));
+        btn.addEventListener('click', () => {
+            switchDashboard(btn.dataset.dashboard);
+            // Close mobile menu after selection
+            if (window.innerWidth <= 768) {
+                document.getElementById('nav-links').classList.remove('active');
+            }
+        });
+    });
+
+    // Mobile nav toggle
+    document.getElementById('nav-toggle').addEventListener('click', () => {
+        document.getElementById('nav-links').classList.toggle('active');
     });
 
     document.getElementById('update-budget').addEventListener('click', updateBudget);
@@ -286,17 +296,6 @@ function openEndWeekModal(weekKey) {
 function closeEndWeekModal() {
     document.getElementById('end-week-modal').classList.remove('active');
     currentWeekToEnd = null;
-}
-
-function setupModalScroll() {
-    const modalBody = document.querySelector('#alert-modal .modal-body');
-    if (modalBody) {
-        modalBody.addEventListener('scroll', function() {
-            const isScrolled = this.scrollHeight > this.clientHeight &&
-                              this.scrollTop + this.clientHeight < this.scrollHeight;
-            this.classList.toggle('scrolled', isScrolled);
-        });
-    }
 }
 
 function confirmEndWeek() {
@@ -826,47 +825,60 @@ function updateChartColors() {
 }
 
 function resetMonth() {
-    showAlert('Reset Month',
-        'Are you sure you want to reset for a new month? This will:\n\n• Clear all expenses\n• Reset all week budgets\n• Reset savings and personal balances to 0\n• Unlock budget inputs\n• Keep your budget settings',
-        () => {
-            const monthlyAllowance = AppState.monthlyAllowance;
-            const fixedWeek1Budget = AppState.fixedWeek1Budget;
-            const weeks2to4Budget = AppState.weeks2to4Budget;
+    const modalContent = `
+        <p>Are you sure you want to reset for a new month?</p>
+        <p><strong>This will:</strong></p>
+        <ul style="text-align: left; margin: 15px 0; padding-left: 20px;">
+            <li>Clear all expenses</li>
+            <li>Reset all week budgets</li>
+            <li><strong>KEEP your Savings and Personal balances</strong></li>
+            <li>Unlock budget inputs</li>
+            <li>Keep your budget settings</li>
+        </ul>
+    `;
 
-            // Reset all state except budget values
-            AppState.needs = {
-                fixed_week1: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
-                week2: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
-                week3: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
-                week4: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false }
-            };
+    showAlert('Reset Month', modalContent, () => {
+        const monthlyAllowance = AppState.monthlyAllowance;
+        const fixedWeek1Budget = AppState.fixedWeek1Budget;
+        const weeks2to4Budget = AppState.weeks2to4Budget;
 
-            AppState.income = {
-                externalIncome: 0,
-                savings: { balance: 0, spent: 0, expenses: [] },
-                personal: { balance: 0, spent: 0, expenses: [] }
-            };
+        // PRESERVE savings and personal balances
+        const savingsBalance = AppState.income.savings.balance;
+        const personalBalance = AppState.income.personal.balance;
 
-            AppState.allExpenses = [];
-            AppState.externalIncomeHistory = [];
-            AppState.budgetLocked = false;
-            AppState.currentWeek = 'fixed_week1';
+        // Reset all state except budget values and income balances
+        AppState.needs = {
+            fixed_week1: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+            week2: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+            week3: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+            week4: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false }
+        };
 
-            // Unlock inputs
-            document.getElementById('monthly-allowance').disabled = false;
-            document.getElementById('fixed-week1-budget').disabled = false;
-            document.getElementById('update-budget').disabled = false;
+        AppState.income = {
+            externalIncome: 0,
+            savings: { balance: savingsBalance, spent: 0, expenses: [] },
+            personal: { balance: personalBalance, spent: 0, expenses: [] }
+        };
 
-            // Keep the budget values in inputs
-            document.getElementById('monthly-allowance').value = monthlyAllowance || '';
-            document.getElementById('fixed-week1-budget').value = fixedWeek1Budget || '';
+        AppState.allExpenses = [];
+        AppState.externalIncomeHistory = [];
+        AppState.budgetLocked = false;
+        AppState.currentWeek = 'fixed_week1';
 
-            setMonthStartDate();
-            updateAllDisplays();
-            saveToStorage();
-            showNotification('Month has been reset! Set up your new budget.', 'success');
-        }
-    );
+        // Unlock inputs
+        document.getElementById('monthly-allowance').disabled = false;
+        document.getElementById('fixed-week1-budget').disabled = false;
+        document.getElementById('update-budget').disabled = false;
+
+        // Keep the budget values in inputs
+        document.getElementById('monthly-allowance').value = monthlyAllowance || '';
+        document.getElementById('fixed-week1-budget').value = fixedWeek1Budget || '';
+
+        setMonthStartDate();
+        updateAllDisplays();
+        saveToStorage();
+        showNotification('Month has been reset! Your Savings and Personal balances have been preserved.', 'success');
+    });
 }
 
 function formatCurrency(amount) {
@@ -946,7 +958,7 @@ function showAlert(title, message, onConfirm = null) {
     if (!modal || !titleElement || !messageElement || !confirmButton) return;
 
     titleElement.textContent = title;
-    messageElement.textContent = message;
+    messageElement.innerHTML = message; // Changed from textContent to innerHTML to support HTML
     modal.classList.add('active');
 
     const closeHandler = () => {
@@ -1000,7 +1012,7 @@ function loadFromStorage() {
                     document.getElementById('fixed-week1-budget').value = AppState.fixedWeek1Budget;
                 }
             } else {
-
+                // New month - keep budget values but reset everything else
                 showNotification('New month detected! Please set up your budget.', 'info');
             }
         }
