@@ -280,7 +280,17 @@ function openEndWeekModal(weekKey) {
     } else if (surplus < 0) {
         resultLabel.textContent = 'Deficit:';
         resultValue.className = 'summary-value negative';
-        infoText.textContent = `This deficit will be deducted 50/50 from Savings and Personal balance. Each will lose Ksh ${formatCurrency(Math.abs(surplus) / 2)}.`;
+        const deficit = Math.abs(surplus);
+        const personalBalance = AppState.income.personal.balance;
+
+        if (personalBalance >= deficit) {
+            infoText.textContent = `This deficit of Ksh ${formatCurrency(deficit)} will be deducted from your Personal balance.`;
+        } else if (personalBalance > 0) {
+            const remainingDeficit = deficit - personalBalance;
+            infoText.textContent = `Personal balance (Ksh ${formatCurrency(personalBalance)}) will cover part of the deficit. The remaining Ksh ${formatCurrency(remainingDeficit)} will be deducted from Savings.`;
+        } else {
+            infoText.textContent = `Personal balance is zero. The entire deficit of Ksh ${formatCurrency(deficit)} will be deducted from Savings.`;
+        }
         infoBox.style.display = 'flex';
     } else {
         resultLabel.textContent = 'Result:';
@@ -310,25 +320,31 @@ function confirmEndWeek() {
     // Mark week as ended
     AppState.needs[weekKey].ended = true;
 
-    // Split surplus/deficit 50/50 to savings and personal
-    const halfAmount = parseFloat((surplus / 2).toFixed(2));
-
     if (surplus > 0) {
-        // Surplus: Add to both accounts
+        // Surplus: Split 50/50 to both accounts
+        const halfAmount = parseFloat((surplus / 2).toFixed(2));
         AppState.income.savings.balance = parseFloat((AppState.income.savings.balance + halfAmount).toFixed(2));
         AppState.income.personal.balance = parseFloat((AppState.income.personal.balance + halfAmount).toFixed(2));
         showNotification(`${weekName} ended! Surplus of Ksh ${formatCurrency(surplus)} added to income (50/50 split)`, 'success');
     } else if (surplus < 0) {
-        // Deficit: Deduct from both accounts
+        // Deficit: Deduct from personal first, then savings if needed
         const deficit = Math.abs(surplus);
-        const totalAvailable = AppState.income.savings.balance + AppState.income.personal.balance;
+        const personalBalance = AppState.income.personal.balance;
 
-        if (totalAvailable >= deficit) {
-            AppState.income.savings.balance = Math.max(0, parseFloat((AppState.income.savings.balance - Math.abs(halfAmount)).toFixed(2)));
-            AppState.income.personal.balance = Math.max(0, parseFloat((AppState.income.personal.balance - Math.abs(halfAmount)).toFixed(2)));
-            showNotification(`${weekName} ended! Deficit of Ksh ${formatCurrency(deficit)} deducted from income`, 'warning');
+        if (personalBalance >= deficit) {
+            // Personal balance can cover the entire deficit
+            AppState.income.personal.balance = parseFloat((personalBalance - deficit).toFixed(2));
+            showNotification(`${weekName} ended! Deficit of Ksh ${formatCurrency(deficit)} deducted from Personal balance`, 'warning');
+        } else if (personalBalance > 0) {
+            // Personal balance covers part, savings covers the rest
+            const remainingDeficit = parseFloat((deficit - personalBalance).toFixed(2));
+            AppState.income.personal.balance = 0;
+            AppState.income.savings.balance = Math.max(0, parseFloat((AppState.income.savings.balance - remainingDeficit).toFixed(2)));
+            showNotification(`${weekName} ended! Personal balance used (Ksh ${formatCurrency(personalBalance)}). Remaining deficit (Ksh ${formatCurrency(remainingDeficit)}) deducted from Savings`, 'warning');
         } else {
-            showNotification(`${weekName} ended! Warning: Insufficient funds to cover deficit of Ksh ${formatCurrency(deficit)}`, 'danger');
+            // Personal is zero, deduct entirely from savings
+            AppState.income.savings.balance = Math.max(0, parseFloat((AppState.income.savings.balance - deficit).toFixed(2)));
+            showNotification(`${weekName} ended! Deficit of Ksh ${formatCurrency(deficit)} deducted from Savings (Personal balance was zero)`, 'warning');
         }
     } else {
         showNotification(`${weekName} ended! Perfect budget - no surplus or deficit`, 'info');

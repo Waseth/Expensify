@@ -862,6 +862,8 @@ tbody tr:hover {
     box-shadow: var(--glass-shadow);
     width: 90%;
     max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
     animation: modalIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -871,6 +873,10 @@ tbody tr:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--glass-bg);
+    z-index: 1;
 }
 
 .modal-close {
@@ -911,6 +917,9 @@ tbody tr:hover {
     display: flex;
     justify-content: flex-end;
     gap: var(--spacing-sm);
+    position: sticky;
+    bottom: 0;
+    background: var(--glass-bg);
 }
 
 .info-box {
@@ -1208,10 +1217,21 @@ tbody tr:hover {
     .month-display {
         width: 100%;
         flex-direction: column;
+        max-width: 100%;
+        padding: 0 var(--spacing-sm);
     }
 
     .action-buttons {
         width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #add-external-income,
+    #reset-month {
+        flex: 1;
+        min-width: 120px;
+        margin: 5px;
     }
 
     .grid-container {
@@ -1260,5 +1280,23 @@ tbody tr:hover {
     .notification {
         min-width: 250px;
         font-size: 0.9rem;
+    }
+
+    .month-display-wrapper {
+        padding: 0 10px;
+    }
+
+    .month-display {
+        padding: 0;
+    }
+
+    .action-buttons {
+        margin-bottom: 10px;
+    }
+
+    #add-external-income,
+    #reset-month {
+        font-size: 9px;
+        padding: 8px 12px;
     }
 }
