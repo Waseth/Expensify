@@ -26,9 +26,17 @@ const AppState = {
 let needsBarChart = null;
 let moneyPieChart = null;
 let currentWeekToEnd = null;
+let expenseToDelete = null;
 
 function initApp() {
+
+     const savedTheme = localStorage.getItem('budget-theme');
+    if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+
     document.getElementById('expense-date').valueAsDate = new Date();
+
     setMonthStartDate();
     loadFromStorage();
     setupEventListeners();
@@ -45,13 +53,18 @@ function setupEventListeners() {
             // Close mobile menu after selection
             if (window.innerWidth <= 768) {
                 document.getElementById('nav-links').classList.remove('active');
+                document.getElementById('nav-toggle').classList.remove('active');
             }
         });
     });
 
     // Mobile nav toggle
     document.getElementById('nav-toggle').addEventListener('click', () => {
-        document.getElementById('nav-links').classList.toggle('active');
+        const navLinks = document.getElementById('nav-links');
+        const navToggle = document.getElementById('nav-toggle');
+
+        navLinks.classList.toggle('active');
+        navToggle.classList.toggle('active');
     });
 
     document.getElementById('update-budget').addEventListener('click', updateBudget);
@@ -59,6 +72,7 @@ function setupEventListeners() {
     document.getElementById('monthly-allowance').addEventListener('input', calculateWeeksBudget);
     document.getElementById('fixed-week1-budget').addEventListener('input', calculateWeeksBudget);
     document.getElementById('reset-month').addEventListener('click', resetMonth);
+    document.getElementById('clear-all-data').addEventListener('click', openClearAllDataModal);
     document.getElementById('add-external-income').addEventListener('click', openExternalIncomeModal);
     document.getElementById('external-income-submit').addEventListener('click', addExternalIncome);
     document.getElementById('external-income-cancel').addEventListener('click', closeExternalIncomeModal);
@@ -70,11 +84,19 @@ function setupEventListeners() {
     document.getElementById('end-week-confirm').addEventListener('click', confirmEndWeek);
     document.getElementById('end-week-cancel').addEventListener('click', closeEndWeekModal);
 
+    document.getElementById('delete-expense-confirm').addEventListener('click', confirmDeleteExpense);
+    document.getElementById('delete-expense-cancel').addEventListener('click', closeDeleteExpenseModal);
+
+    document.getElementById('clear-all-data-confirm').addEventListener('click', confirmClearAllData);
+    document.getElementById('clear-all-data-cancel').addEventListener('click', closeClearAllDataModal);
+
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', () => {
             closeExternalIncomeModal();
             closeModal();
             closeEndWeekModal();
+            closeDeleteExpenseModal();
+            closeClearAllDataModal();
         });
     });
 
@@ -87,10 +109,13 @@ function setupThemeToggler() {
     toggler.innerHTML = `<button class="theme-toggle-btn" id="theme-toggle"><i class="fas fa-moon"></i></button>`;
     document.body.appendChild(toggler);
 
-    const savedTheme = localStorage.getItem('budget-theme');
-    if (savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.querySelector('#theme-toggle i').className = 'fas fa-sun';
+    // Set correct icon based on current theme
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const icon = document.querySelector('#theme-toggle i');
+    if (currentTheme === 'light') {
+        icon.className = 'fas fa-sun';
+    } else {
+        icon.className = 'fas fa-moon';
     }
 
     document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -101,17 +126,38 @@ function toggleTheme() {
     const newTheme = currentTheme === 'light' ? null : 'light';
     const icon = document.querySelector('#theme-toggle i');
 
-    if (newTheme) {
-        document.documentElement.setAttribute('data-theme', newTheme);
-        icon.className = 'fas fa-sun';
-        localStorage.setItem('budget-theme', 'light');
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-        icon.className = 'fas fa-moon';
-        localStorage.setItem('budget-theme', 'dark');
-    }
+    // Add rotation animation to button
+    const button = document.getElementById('theme-toggle');
+    button.style.transform = 'rotate(360deg)';
+    setTimeout(() => {
+        button.style.transform = '';
+    }, 500);
 
-    updateChartColors();
+    // Fade out icon
+    icon.style.opacity = '0';
+    icon.style.transform = 'rotate(180deg) scale(0.5)';
+
+    setTimeout(() => {
+        if (newTheme) {
+            document.documentElement.setAttribute('data-theme', newTheme);
+            icon.className = 'fas fa-sun';
+            localStorage.setItem('budget-theme', 'light');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            icon.className = 'fas fa-moon';
+            localStorage.setItem('budget-theme', 'dark');
+        }
+
+        updateChartColors();
+
+        // Fade in new icon
+        setTimeout(() => {
+            icon.style.opacity = '1';
+            icon.style.transform = 'rotate(0deg) scale(1)';
+        }, 50);
+    }, 150);
+
+
 }
 
 function setMonthStartDate() {
@@ -136,10 +182,23 @@ function calculateWeeksBudget() {
 
     if (allowance >= week1Budget && week1Budget > 0) {
         const remaining = allowance - week1Budget;
-        const weeklyBudget = remaining / 3;
+        const weeklyBudgetRaw = remaining / 3;
+        const weeklyBudget = Math.floor(weeklyBudgetRaw / 10) * 10; // Round down to nearest 10
+        const leftover = remaining - (weeklyBudget * 3); // Calculate leftover amount
+
         document.getElementById('weeks2-4-budget').textContent = `Ksh ${formatCurrency(weeklyBudget)}`;
+
+        // Show leftover info if there is any
+        const leftoverInfo = document.getElementById('leftover-info');
+        if (leftover > 0) {
+            leftoverInfo.textContent = `Ksh ${formatCurrency(leftover)} will be added to Savings`;
+            leftoverInfo.style.display = 'block';
+        } else {
+            leftoverInfo.style.display = 'none';
+        }
     } else {
         document.getElementById('weeks2-4-budget').textContent = 'Ksh 0';
+        document.getElementById('leftover-info').style.display = 'none';
     }
 }
 
@@ -164,15 +223,26 @@ function updateBudget() {
 
     AppState.monthlyAllowance = allowance;
     AppState.fixedWeek1Budget = week1Budget;
-    AppState.weeks2to4Budget = (allowance - week1Budget) / 3;
+
+    const remaining = allowance - week1Budget;
+    const weeklyBudgetRaw = remaining / 3;
+    const weeklyBudget = Math.floor(weeklyBudgetRaw / 10) * 10; // Round down to nearest 10
+    const leftover = parseFloat((remaining - (weeklyBudget * 3)).toFixed(2)); // Calculate leftover amount
+
+    AppState.weeks2to4Budget = weeklyBudget;
 
     AppState.needs.fixed_week1.allocated = week1Budget;
     AppState.needs.fixed_week1.remaining = week1Budget;
 
     ['week2', 'week3', 'week4'].forEach(week => {
-        AppState.needs[week].allocated = AppState.weeks2to4Budget;
-        AppState.needs[week].remaining = AppState.weeks2to4Budget;
+        AppState.needs[week].allocated = weeklyBudget;
+        AppState.needs[week].remaining = weeklyBudget;
     });
+
+    // Add leftover to savings
+    if (leftover > 0) {
+        AppState.income.savings.balance = parseFloat((AppState.income.savings.balance + leftover).toFixed(2));
+    }
 
     // Lock the input fields
     AppState.budgetLocked = true;
@@ -182,7 +252,13 @@ function updateBudget() {
 
     updateAllDisplays();
     saveToStorage();
-    showNotification('Budget plan updated and locked!', 'success');
+
+    // Show notification with leftover info
+    if (leftover > 0) {
+        showNotification(`Budget plan updated! Ksh ${formatCurrency(leftover)} leftover added to Savings.`, 'success');
+    } else {
+        showNotification('Budget plan updated and locked!', 'success');
+    }
 }
 
 function addExpense(e) {
@@ -399,19 +475,65 @@ function addExternalIncome() {
 }
 
 function deleteExpense(expenseId) {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    // Find the expense details
+    let expense = null;
+    let category = null;
+
+    // Search in needs categories
+    Object.keys(AppState.needs).forEach(cat => {
+        const found = AppState.needs[cat].expenses.find(e => e.id === expenseId);
+        if (found) {
+            expense = found;
+            category = cat;
+        }
+    });
+
+    // Search in income categories if not found
+    if (!expense) {
+        ['savings', 'personal'].forEach(cat => {
+            const found = AppState.income[cat].expenses.find(e => e.id === expenseId);
+            if (found) {
+                expense = found;
+                category = cat;
+            }
+        });
+    }
+
+    if (!expense) return;
+
+    // Check if week is ended
+    if (category in AppState.needs && AppState.needs[category].ended) {
+        showAlert('Cannot Delete', 'Cannot delete expenses from an ended week.');
+        return;
+    }
+
+    // Store the expense ID for deletion
+    expenseToDelete = expenseId;
+
+    // Update modal with expense details
+    document.getElementById('delete-expense-description').textContent = expense.description;
+    document.getElementById('delete-expense-amount').textContent = `Ksh ${formatCurrency(expense.amount)}`;
+    document.getElementById('delete-expense-category').textContent = getCategoryName(category);
+
+    // Open the modal
+    document.getElementById('delete-expense-modal').classList.add('active');
+}
+
+function closeDeleteExpenseModal() {
+    document.getElementById('delete-expense-modal').classList.remove('active');
+    expenseToDelete = null;
+}
+
+function confirmDeleteExpense() {
+    if (!expenseToDelete) return;
 
     let expenseFound = false;
     let deletedExpense = null;
 
     // Search in needs categories
     Object.keys(AppState.needs).forEach(category => {
-        const index = AppState.needs[category].expenses.findIndex(e => e.id === expenseId);
+        const index = AppState.needs[category].expenses.findIndex(e => e.id === expenseToDelete);
         if (index > -1) {
-            if (AppState.needs[category].ended) {
-                showAlert('Cannot Delete', 'Cannot delete expenses from an ended week.');
-                return;
-            }
             deletedExpense = AppState.needs[category].expenses[index];
             AppState.needs[category].spent = parseFloat((AppState.needs[category].spent - deletedExpense.amount).toFixed(2));
             AppState.needs[category].remaining = parseFloat((AppState.needs[category].remaining + deletedExpense.amount).toFixed(2));
@@ -423,7 +545,7 @@ function deleteExpense(expenseId) {
     // Search in income categories
     if (!expenseFound) {
         ['savings', 'personal'].forEach(category => {
-            const index = AppState.income[category].expenses.findIndex(e => e.id === expenseId);
+            const index = AppState.income[category].expenses.findIndex(e => e.id === expenseToDelete);
             if (index > -1) {
                 deletedExpense = AppState.income[category].expenses[index];
                 AppState.income[category].spent = parseFloat((AppState.income[category].spent - deletedExpense.amount).toFixed(2));
@@ -435,9 +557,10 @@ function deleteExpense(expenseId) {
     }
 
     if (expenseFound) {
-        const allIndex = AppState.allExpenses.findIndex(e => e.id === expenseId);
+        const allIndex = AppState.allExpenses.findIndex(e => e.id === expenseToDelete);
         if (allIndex > -1) AppState.allExpenses.splice(allIndex, 1);
 
+        closeDeleteExpenseModal();
         updateAllDisplays();
         saveToStorage();
         showNotification('Expense deleted successfully!', 'success');
@@ -707,6 +830,10 @@ function updateMonthDisplay() {
 }
 
 function initCharts() {
+    const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
+    const textColor = isLightTheme ? '#000000' : '#ffffff';  // Black in light, white in dark
+    const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(94, 58, 238, 0.3)';  // Light gray in light, purple in dark
+
     const barCanvas = document.getElementById('needs-bar-chart');
     if (barCanvas) {
         needsBarChart = new Chart(barCanvas.getContext('2d'), {
@@ -732,21 +859,40 @@ function initCharts() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() }
+                        labels: {
+                            color: textColor,
+                            font: {
+                                size: 12
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
-                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() },
-                        grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--glass-border').trim() }
+                        ticks: {
+                            color: textColor,
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
                     },
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                            color: textColor,
+                            font: {
+                                size: 11
+                            },
                             callback: value => 'Ksh ' + formatCurrency(value)
                         },
-                        grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--glass-border').trim() }
+                        grid: {
+                            color: gridColor,
+                            drawBorder: false
+                        }
                     }
                 }
             }
@@ -763,7 +909,7 @@ function initCharts() {
                     data: [0, 0, 0],
                     backgroundColor: ['rgba(94, 58, 238, 0.8)', 'rgba(46, 204, 113, 0.8)', 'rgba(155, 89, 182, 0.8)'],
                     borderColor: ['rgba(94, 58, 238, 1)', 'rgba(46, 204, 113, 1)', 'rgba(155, 89, 182, 1)'],
-                    borderWidth: 1
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -773,12 +919,20 @@ function initCharts() {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                            color: textColor,
                             padding: 20,
-                            font: { size: 12 }
+                            font: {
+                                size: 12,
+                                family: "'Poppins', sans-serif"
+                            }
                         }
                     },
                     tooltip: {
+                        backgroundColor: isLightTheme ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 12, 41, 0.9)',
+                        titleColor: textColor,
+                        bodyColor: textColor,
+                        borderColor: 'rgba(94, 58, 238, 0.5)',
+                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
@@ -825,18 +979,22 @@ function updateCharts() {
 }
 
 function updateChartColors() {
+    const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
+    const textColor = isLightTheme ? '#000000' : '#ffffff';  // Black in light, white in dark
+    const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.1)' : 'rgba(94, 58, 238, 0.3)';  // Light gray in light, purple in dark
+
     if (needsBarChart) {
-        needsBarChart.options.plugins.legend.labels.color = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
-        needsBarChart.options.scales.x.ticks.color = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
-        needsBarChart.options.scales.x.grid.color = getComputedStyle(document.documentElement).getPropertyValue('--glass-border').trim();
-        needsBarChart.options.scales.y.ticks.color = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
-        needsBarChart.options.scales.y.grid.color = getComputedStyle(document.documentElement).getPropertyValue('--glass-border').trim();
-        needsBarChart.update();
+        needsBarChart.options.plugins.legend.labels.color = textColor;
+        needsBarChart.options.scales.x.ticks.color = textColor;
+        needsBarChart.options.scales.x.grid.color = gridColor;
+        needsBarChart.options.scales.y.ticks.color = textColor;
+        needsBarChart.options.scales.y.grid.color = gridColor;
+        needsBarChart.update('none'); // Use 'none' to prevent animation which might cause flickering
     }
 
     if (moneyPieChart) {
-        moneyPieChart.options.plugins.legend.labels.color = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
-        moneyPieChart.update();
+        moneyPieChart.options.plugins.legend.labels.color = textColor;
+        moneyPieChart.update('none');
     }
 }
 
@@ -897,7 +1055,70 @@ function resetMonth() {
     });
 }
 
+function openClearAllDataModal() {
+    document.getElementById('clear-all-data-modal').classList.add('active');
+}
+
+function closeClearAllDataModal() {
+    document.getElementById('clear-all-data-modal').classList.remove('active');
+}
+
+function confirmClearAllData() {
+    // Reset EVERYTHING to initial state
+    AppState.monthlyAllowance = 0;
+    AppState.fixedWeek1Budget = 0;
+    AppState.weeks2to4Budget = 0;
+    AppState.budgetLocked = false;
+    AppState.currentWeek = 'fixed_week1';
+
+    AppState.needs = {
+        fixed_week1: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+        week2: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+        week3: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false },
+        week4: { allocated: 0, spent: 0, remaining: 0, expenses: [], ended: false }
+    };
+
+    AppState.income = {
+        externalIncome: 0,
+        savings: { balance: 0, spent: 0, expenses: [] },
+        personal: { balance: 0, spent: 0, expenses: [] }
+    };
+
+    AppState.allExpenses = [];
+    AppState.externalIncomeHistory = [];
+
+    // Clear form inputs
+    document.getElementById('monthly-allowance').value = '';
+    document.getElementById('fixed-week1-budget').value = '';
+    document.getElementById('monthly-allowance').disabled = false;
+    document.getElementById('fixed-week1-budget').disabled = false;
+    document.getElementById('update-budget').disabled = false;
+
+    // Clear localStorage
+    localStorage.removeItem('expensify-budget-app');
+
+    // Reset month start date
+    setMonthStartDate();
+
+    // Close modal
+    closeClearAllDataModal();
+
+    // Update all displays
+    updateAllDisplays();
+
+    // Show success notification
+    showNotification('All data has been cleared! Starting fresh.', 'success');
+}
+
 function formatCurrency(amount) {
+    const formatted = parseFloat(amount).toFixed(2);
+    // Remove .00 if it's a whole number
+    if (formatted.endsWith('.00')) {
+        return parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    }
     return parseFloat(amount).toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -1037,4 +1258,7 @@ function loadFromStorage() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', function() {
+    // Small delay to ensure all CSS is applied
+    setTimeout(initApp, 100);
+});
