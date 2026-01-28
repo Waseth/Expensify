@@ -138,12 +138,12 @@ body {
 
 .nav-btn {
     flex: 1;
-    min-width: 100px;
-    max-width: 200px;
+    min-width: 200px;
+    max-width: 250px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    padding: 8px 0;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     gap: var(--spacing-xs);
@@ -176,44 +176,51 @@ body {
     border: 1px solid rgba(94, 58, 238, 0.3);
     font-weight: 600;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
 }
 
 .month-display-wrapper {
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 10px;
 }
 
 .month-display {
-    max-width: 500px;
-    width: 100%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    margin: 0 auto;
+    justify-content: center;
 }
 
 .action-buttons {
     display: flex;
-    gap: 3px;
+    gap: 10px;
     align-items: center;
     margin-bottom: 20px;
 }
 
 #reset-month {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
+    padding: 10px 18px;
+    min-width: 130px;
 }
 
 #add-external-income {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
+    padding: 10px 18px;
+    min-width: 150px;
 }
 
 #clear-all-data {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
+    padding: 10px 18px;
+    min-width: 130px;
 }
 
 #current-month {
@@ -248,7 +255,7 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-size: 14px;
+    font-size: 2rem;
     margin-bottom: var(--spacing-sm);
     font-weight: 800;
 }
@@ -336,6 +343,8 @@ input[type=number]::-webkit-outer-spin-button {
 
 .card-body {
     padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
 }
 
 #add-external-income{
@@ -1398,8 +1407,9 @@ tbody tr:hover {
     }
 
     .current-week-display {
-        order: 1;
-        margin: 0;
+       display: flex;
+       align-items: center;
+       margin: 0 auto;
     }
 
     .nav-links {
@@ -1550,7 +1560,7 @@ tbody tr:hover {
     }
 
     .chart-container {
-        height: 450px;
+        height: 400px;
         padding: var(--spacing-sm);
     }
 }
