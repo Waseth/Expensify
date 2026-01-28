@@ -1250,7 +1250,7 @@ function loadFromStorage() {
                 }
             } else {
                 // New month - keep budget values but reset everything else
-                showNotification('New month detected! Please set up your budget.', 'info');
+                showNotification('New month has began! Please set up your budget.', 'info');
             }
         }
     } catch (error) {
